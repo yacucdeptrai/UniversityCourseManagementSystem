@@ -81,4 +81,27 @@ public class StudentDAO {
         }
         return students;
     }
+
+    public void updateStudent(Student student) {
+        String query = "UPDATE students SET person_id = ? WHERE student_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, student.getId());
+            stmt.setInt(2, student.getStudentID());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteStudent(int studentID) {
+        String query = "DELETE FROM students WHERE student_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, studentID);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

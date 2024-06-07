@@ -1,38 +1,12 @@
 package main.java.com.university.dao;
 
 import main.java.com.university.model.Person;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 
 public class PersonDAO {
-    public Person getPersonById(int id) {
-        String query = "SELECT * FROM persons WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                String name = rs.getString("name");
-                LocalDate dateOfBirth = rs.getDate("date_of_birth").toLocalDate();
-                String gender = rs.getString("gender");
-                // Trả về đối tượng tạm thời vì Person là abstract
-                return new Person(name, dateOfBirth, gender) {
-                    @Override
-                    public void displayInfo() {
-                        System.out.println("Person: " + getName());
-                    }
-                };
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public int savePerson(Person person) {
         String query = "INSERT INTO persons (name, date_of_birth, gender) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -41,13 +15,39 @@ public class PersonDAO {
             stmt.setDate(2, java.sql.Date.valueOf(person.getDateOfBirth()));
             stmt.setString(3, person.getGender());
             stmt.executeUpdate();
-            ResultSet generatedKeys = stmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                return generatedKeys.getInt(1);
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1); // Trả về ID tự sinh
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public void updatePerson(Person person) {
+        String query = "UPDATE persons SET name = ?, date_of_birth = ?, gender = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, person.getName());
+            stmt.setDate(2, java.sql.Date.valueOf(person.getDateOfBirth()));
+            stmt.setString(3, person.getGender());
+            stmt.setInt(4, person.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deletePerson(int personID) {
+        String query = "DELETE FROM persons WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, personID);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

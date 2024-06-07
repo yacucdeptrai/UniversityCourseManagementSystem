@@ -80,4 +80,27 @@ public class LecturerDAO {
         }
         return lecturers;
     }
+
+    public void updateLecturer(Lecturer lecturer) {
+        String query = "UPDATE lecturers SET person_id = ? WHERE lecturer_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, lecturer.getId());
+            stmt.setInt(2, lecturer.getLecturerID());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteLecturer(int lecturerID) {
+        String query = "DELETE FROM lecturers WHERE lecturer_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, lecturerID);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

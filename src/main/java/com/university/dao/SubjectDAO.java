@@ -66,4 +66,28 @@ public class SubjectDAO {
         }
         return subjects;
     }
+
+    public void updateSubject(Subject subject) {
+        String query = "UPDATE subjects SET subject_name = ?, lecturer_id = ? WHERE subject_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, subject.getSubjectName());
+            stmt.setInt(2, subject.getLecturer().getLecturerID());
+            stmt.setInt(3, subject.getSubjectID());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteSubject(int subjectID) {
+        String query = "DELETE FROM subjects WHERE subject_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, subjectID);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -10,14 +10,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 
-public class AddStudentUI extends JFrame {
+public class EditStudentUI extends JFrame {
     private JTextField nameField;
     private JTextField dobField;
     private JTextField genderField;
     private JTextField studentIDField;
 
-    public AddStudentUI() {
-        setTitle("Add New Student");
+    public EditStudentUI(Student student) {
+        if (student == null) {
+            JOptionPane.showMessageDialog(null, "Student not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+
+        setTitle("Edit Student");
         setBounds(100, 100, 400, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
@@ -26,7 +32,7 @@ public class AddStudentUI extends JFrame {
         lblName.setBounds(10, 20, 80, 25);
         getContentPane().add(lblName);
 
-        nameField = new JTextField();
+        nameField = new JTextField(student.getName());
         nameField.setBounds(100, 20, 250, 25);
         getContentPane().add(nameField);
 
@@ -34,7 +40,7 @@ public class AddStudentUI extends JFrame {
         lblDob.setBounds(10, 60, 200, 25);
         getContentPane().add(lblDob);
 
-        dobField = new JTextField();
+        dobField = new JTextField(student.getDateOfBirth().toString());
         dobField.setBounds(220, 60, 130, 25);
         getContentPane().add(dobField);
 
@@ -42,23 +48,20 @@ public class AddStudentUI extends JFrame {
         lblGender.setBounds(10, 100, 80, 25);
         getContentPane().add(lblGender);
 
-        genderField = new JTextField();
+        genderField = new JTextField(student.getGender());
         genderField.setBounds(100, 100, 250, 25);
         getContentPane().add(genderField);
 
-        JLabel lblStudentID = new JLabel("Student ID:");
-        lblStudentID.setBounds(10, 140, 80, 25);
-        getContentPane().add(lblStudentID);
-
-        studentIDField = new JTextField();
+        studentIDField = new JTextField(String.valueOf(student.getStudentID()));
         studentIDField.setBounds(100, 140, 250, 25);
+        studentIDField.setVisible(false); // Ẩn trường studentID vì không cần chỉnh sửa
         getContentPane().add(studentIDField);
 
-        JButton btnAddStudent = new JButton("Add Student");
-        btnAddStudent.setBounds(10, 180, 140, 25);
-        getContentPane().add(btnAddStudent);
+        JButton btnEditStudent = new JButton("Edit Student");
+        btnEditStudent.setBounds(10, 180, 140, 25);
+        getContentPane().add(btnEditStudent);
 
-        btnAddStudent.addActionListener(new ActionListener() {
+        btnEditStudent.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String name = nameField.getText();
@@ -66,15 +69,16 @@ public class AddStudentUI extends JFrame {
                 String gender = genderField.getText();
                 int studentID = Integer.parseInt(studentIDField.getText());
 
-                Student student = new Student(name, dob, gender, studentID);
+                Student updatedStudent = new Student(name, dob, gender, studentID);
+                updatedStudent.setId(student.getId());
+
                 PersonDAO personDAO = new PersonDAO();
                 StudentDAO studentDAO = new StudentDAO();
 
-                int personID = personDAO.savePerson(student);
-                student.setId(personID);
-                studentDAO.saveStudent(student);
+                personDAO.updatePerson(updatedStudent);
+                studentDAO.updateStudent(updatedStudent);
 
-                JOptionPane.showMessageDialog(null, "Student added successfully!");
+                JOptionPane.showMessageDialog(null, "Student updated successfully!");
                 dispose();
             }
         });
@@ -84,7 +88,10 @@ public class AddStudentUI extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    AddStudentUI frame = new AddStudentUI();
+                    // Test with a sample student object (chỉnh sửa với studentID thực tế)
+                    StudentDAO studentDAO = new StudentDAO();
+                    Student student = studentDAO.getStudentById(999); // Thay thế bằng ID sinh viên thực tế
+                    EditStudentUI frame = new EditStudentUI(student);
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
