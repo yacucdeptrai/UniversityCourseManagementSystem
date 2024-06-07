@@ -12,7 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class ManageEnrollmentUI extends JFrame {
+public class ManageEnrollmentUI extends JFrame { // Kế thừa từ JFrame
     private JComboBox<Student> studentComboBox;
     private JComboBox<Subject> subjectComboBox;
 
@@ -58,7 +58,7 @@ public class ManageEnrollmentUI extends JFrame {
         loadStudents();
         loadSubjects();
 
-        frame.setVisible(true);
+        setVisible(true); // Hiển thị frame
     }
 
     private void loadStudents() {
@@ -90,4 +90,3 @@ public class ManageEnrollmentUI extends JFrame {
         });
     }
 }
-

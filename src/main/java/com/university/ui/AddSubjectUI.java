@@ -9,8 +9,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
-public class AddSubjectUI extends JFrame {
+public class AddSubjectUI extends JFrame { // Kế thừa từ JFrame
     private JTextField subjectNameField;
     private JTextField subjectIDField;
     private JComboBox<Lecturer> lecturerComboBox;
@@ -70,7 +71,7 @@ public class AddSubjectUI extends JFrame {
 
     private void loadLecturers() {
         LecturerDAO lecturerDAO = new LecturerDAO();
-        java.util.List<Lecturer> lecturers = lecturerDAO.getAllLecturers();
+        List<Lecturer> lecturers = lecturerDAO.getAllLecturers();
         for (Lecturer lecturer : lecturers) {
             lecturerComboBox.addItem(lecturer);
         }
@@ -89,4 +90,3 @@ public class AddSubjectUI extends JFrame {
         });
     }
 }
-
