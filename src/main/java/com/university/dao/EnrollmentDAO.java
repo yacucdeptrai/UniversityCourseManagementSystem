@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class EnrollmentDAO {
+public class    EnrollmentDAO {
     public void enrollStudent(int studentID, int subjectID) {
         String query = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();

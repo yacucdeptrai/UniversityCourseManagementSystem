@@ -2,7 +2,6 @@ package main.java.com.university.dao;
 
 import main.java.com.university.model.Lecturer;
 import main.java.com.university.model.Subject;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
