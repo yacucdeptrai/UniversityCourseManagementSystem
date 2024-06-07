@@ -1,7 +1,7 @@
 package main.java.com.university.ui;
 
-import main.java.com.university.dao.PersonDAO;
 import main.java.com.university.dao.StudentDAO;
+import main.java.com.university.dao.PersonDAO;
 import main.java.com.university.model.Student;
 
 import javax.swing.*;
@@ -13,8 +13,8 @@ import java.time.LocalDate;
 public class AddStudentUI extends JFrame {
     private JTextField nameField;
     private JTextField dobField;
-    private JTextField genderField;
-    private JTextField studentIDField;
+    private JComboBox<String> genderComboBox;
+    private JLabel studentIDLabel;
 
     public AddStudentUI() {
         setTitle("Add New Student");
@@ -27,7 +27,7 @@ public class AddStudentUI extends JFrame {
         getContentPane().add(lblName);
 
         nameField = new JTextField();
-        nameField.setBounds(100, 20, 250, 25);
+        nameField.setBounds(120, 20, 250, 25);
         getContentPane().add(nameField);
 
         JLabel lblDob = new JLabel("Date of Birth (YYYY-MM-DD):");
@@ -35,60 +35,59 @@ public class AddStudentUI extends JFrame {
         getContentPane().add(lblDob);
 
         dobField = new JTextField();
-        dobField.setBounds(220, 60, 130, 25);
+        dobField.setBounds(220, 60, 150, 25);
         getContentPane().add(dobField);
 
         JLabel lblGender = new JLabel("Gender:");
         lblGender.setBounds(10, 100, 80, 25);
         getContentPane().add(lblGender);
 
-        genderField = new JTextField();
-        genderField.setBounds(100, 100, 250, 25);
-        getContentPane().add(genderField);
+        genderComboBox = new JComboBox<>(new String[] {"Male", "Female"});
+        genderComboBox.setBounds(120, 100, 250, 25);
+        getContentPane().add(genderComboBox);
 
         JLabel lblStudentID = new JLabel("Student ID:");
         lblStudentID.setBounds(10, 140, 80, 25);
         getContentPane().add(lblStudentID);
 
-        studentIDField = new JTextField();
-        studentIDField.setBounds(100, 140, 250, 25);
-        getContentPane().add(studentIDField);
+        studentIDLabel = new JLabel();
+        studentIDLabel.setBounds(120, 140, 250, 25);
+        getContentPane().add(studentIDLabel);
 
         JButton btnAddStudent = new JButton("Add Student");
         btnAddStudent.setBounds(10, 180, 140, 25);
         getContentPane().add(btnAddStudent);
 
-        btnAddStudent.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String name = nameField.getText();
-                LocalDate dob = LocalDate.parse(dobField.getText());
-                String gender = genderField.getText();
-                int studentID = Integer.parseInt(studentIDField.getText());
+        btnAddStudent.addActionListener(e -> addStudent());
 
-                Student student = new Student(name, dob, gender, studentID);
-                PersonDAO personDAO = new PersonDAO();
-                StudentDAO studentDAO = new StudentDAO();
+        setVisible(true);
+    }
 
-                int personID = personDAO.savePerson(student);
-                student.setId(personID);
-                studentDAO.saveStudent(student);
+    private void addStudent() {
+        String name = nameField.getText();
+        LocalDate dob = LocalDate.parse(dobField.getText());
+        String gender = (String) genderComboBox.getSelectedItem();
 
-                JOptionPane.showMessageDialog(null, "Student added successfully!");
-                dispose();
-            }
-        });
+        Student student = new Student(name, dob, gender, 0); // Student ID sẽ được tự động sinh bởi cơ sở dữ liệu
+        PersonDAO personDAO = new PersonDAO();
+        StudentDAO studentDAO = new StudentDAO();
+
+        int personId = personDAO.savePerson(student);
+        student.setId(personId);
+        int studentId = studentDAO.saveStudentAndReturnID(student);
+
+        studentIDLabel.setText(String.valueOf(studentId)); // Hiển thị Student ID sau khi thêm thành công
+
+        JOptionPane.showMessageDialog(this, "Student added successfully!");
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    AddStudentUI frame = new AddStudentUI();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                AddStudentUI frame = new AddStudentUI();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

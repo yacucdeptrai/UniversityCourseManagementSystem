@@ -5,8 +5,6 @@ import main.java.com.university.ui.EditStudentUI;
 import main.java.com.university.ui.AddLecturerUI;
 import main.java.com.university.ui.AddSubjectUI;
 import main.java.com.university.ui.ManageEnrollmentUI;
-import main.java.com.university.dao.StudentDAO;
-import main.java.com.university.model.Student;
 
 import javax.swing.*;
 
@@ -43,15 +41,8 @@ public class UniversityManagementSystem {
         });
 
         btnEditStudent.addActionListener(e -> {
-            StudentDAO studentDAO = new StudentDAO();
-            int studentID = 999; // Lấy studentID từ đầu vào người dùng hoặc một cách khác
-            Student student = studentDAO.getStudentById(studentID);
-            if (student != null) {
-                EditStudentUI editStudentUI = new EditStudentUI(student);
-                editStudentUI.setVisible(true);
-            } else {
-                JOptionPane.showMessageDialog(null, "Student not found with ID: " + studentID, "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            EditStudentUI editStudentUI = new EditStudentUI();
+            editStudentUI.setVisible(true);
         });
 
         btnAddLecturer.addActionListener(e -> {
