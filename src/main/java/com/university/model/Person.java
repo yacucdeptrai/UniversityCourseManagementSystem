@@ -2,7 +2,7 @@ package main.java.com.university.model;
 
 import java.time.LocalDate;
 
-public class Person {
+public abstract class Person {
     private int id;
     private String name;
     private LocalDate dateOfBirth;
@@ -13,6 +13,9 @@ public class Person {
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
     }
+
+    // Phương thức trừu tượng để hiển thị thông tin
+    public abstract void displayInfo();
 
     // Getter và Setter
     public int getId() {

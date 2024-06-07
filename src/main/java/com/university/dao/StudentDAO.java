@@ -51,7 +51,7 @@ public class StudentDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, student.getStudentID());
-            stmt.setInt(2, student.getId()); // Chú ý: ID của person đã được tạo
+            stmt.setInt(2, student.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

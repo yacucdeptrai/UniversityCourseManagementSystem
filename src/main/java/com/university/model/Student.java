@@ -10,6 +10,12 @@ public class Student extends Person {
         this.studentID = studentID;
     }
 
+    @Override
+    public void displayInfo() {
+        System.out.println("Student Name: " + getName());
+        System.out.println("Student ID: " + getStudentID());
+    }
+
     // Getter và Setter
     public int getStudentID() {
         return studentID;
