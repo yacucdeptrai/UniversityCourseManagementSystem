@@ -1,71 +1,55 @@
 package main.java.com.university.main;
 
-import main.java.com.university.dao.*;
-import main.java.com.university.model.*;
+import main.java.com.university.ui.AddStudentUI;
+import main.java.com.university.ui.AddLecturerUI;
+import main.java.com.university.ui.AddSubjectUI;
+import main.java.com.university.ui.ManageEnrollmentUI;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.swing.*;
 
 public class UniversityManagementSystem {
-    private static ArrayList<Student> students = new ArrayList<>();
-    private static ArrayList<Lecturer> lecturers = new ArrayList<>();
-    private static ArrayList<Subject> subjects = new ArrayList<>();
-    private static HashMap<Integer, ArrayList<Integer>> enrollments = new HashMap<>();
-
     public static void main(String[] args) {
-        PersonDAO personDAO = new PersonDAO();
-        StudentDAO studentDAO = new StudentDAO();
-        LecturerDAO lecturerDAO = new LecturerDAO();
-        SubjectDAO subjectDAO = new SubjectDAO();
+        JFrame mainFrame = new JFrame("University Management System");
+        mainFrame.setSize(400, 200);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setLayout(null);
 
-        // Tạo dữ liệu mẫu
-        Student student = new Student("Nguyen Van A", LocalDate.of(1995, 5, 20), "Nam", 1);
-        int person1ID = personDAO.savePerson(student);
-        student.setId(person1ID);
-        studentDAO.saveStudent(student);
-        students.add(student);
+        JButton btnAddStudent = new JButton("Add Student");
+        btnAddStudent.setBounds(10, 10, 160, 30);
+        mainFrame.add(btnAddStudent);
 
-        Lecturer lecturer = new Lecturer("Tran Thi B", LocalDate.of(1980, 10, 10), "Nu", 1);
-        int person2ID = personDAO.savePerson(lecturer);
-        lecturer.setId(person2ID);
-        lecturerDAO.saveLecturer(lecturer);
-        lecturers.add(lecturer);
+        JButton btnAddLecturer = new JButton("Add Lecturer");
+        btnAddLecturer.setBounds(200, 10, 160, 30);
+        mainFrame.add(btnAddLecturer);
 
-        // Thêm subject sau khi chắc chắn rằng lecturer đã được thêm
-        Subject subject = new Subject(1, "Lap trinh Java", lecturer);
-        subjectDAO.saveSubject(subject);
-        subjects.add(subject);
+        JButton btnAddSubject = new JButton("Add Subject");
+        btnAddSubject.setBounds(10, 50, 160, 30);
+        mainFrame.add(btnAddSubject);
 
-        // Đăng ký sinh viên vào khóa học
-        enrollStudentInSubject(student.getStudentID(), subject.getSubjectID());
+        JButton btnManageEnrollment = new JButton("Manage Enrollment");
+        btnManageEnrollment.setBounds(200, 50, 160, 30);
+        mainFrame.add(btnManageEnrollment);
 
-        // Hiển thị dữ liệu
-        displayData();
-    }
+        btnAddStudent.addActionListener(e -> {
+            AddStudentUI addStudentUI = new AddStudentUI();
+            addStudentUI.setVisible(true);
+        });
 
-    public static void enrollStudentInSubject(int studentID, int subjectID) {
-        if (!enrollments.containsKey(studentID)) {
-            enrollments.put(studentID, new ArrayList<>());
-        }
-        enrollments.get(studentID).add(subjectID);
-    }
+        btnAddLecturer.addActionListener(e -> {
+            AddLecturerUI addLecturerUI = new AddLecturerUI();
+            addLecturerUI.setVisible(true);
+        });
 
-    public static void displayData() {
-        for (Student student : students) {
-            student.displayInfo();
-        }
+        btnAddSubject.addActionListener(e -> {
+            AddSubjectUI addSubjectUI = new AddSubjectUI();
+            addSubjectUI.setVisible(true);
+        });
 
-        for (Lecturer lecturer : lecturers) {
-            lecturer.displayInfo();
-        }
+        btnManageEnrollment.addActionListener(e -> {
+            ManageEnrollmentUI manageEnrollmentUI = new ManageEnrollmentUI();
+            manageEnrollmentUI.setVisible(true);
+        });
 
-        for (Subject subject : subjects) {
-            System.out.println("Subject: " + subject.getSubjectName());
-        }
-
-        for (Integer studentID : enrollments.keySet()) {
-            System.out.println("Student ID " + studentID + " is enrolled in subjects: " + enrollments.get(studentID));
-        }
+        mainFrame.setVisible(true);
     }
 }
