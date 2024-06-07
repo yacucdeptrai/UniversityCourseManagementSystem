@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class PersonDAO {
     public Person getPersonById(int id) {
@@ -15,11 +16,16 @@ public class PersonDAO {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new Person(
-                        rs.getString("name"),
-                        rs.getDate("date_of_birth").toLocalDate(),
-                        rs.getString("gender")
-                );
+                String name = rs.getString("name");
+                LocalDate dateOfBirth = rs.getDate("date_of_birth").toLocalDate();
+                String gender = rs.getString("gender");
+                // Trả về đối tượng tạm thời vì Person là abstract
+                return new Person(name, dateOfBirth, gender) {
+                    @Override
+                    public void displayInfo() {
+                        System.out.println("Person: " + getName());
+                    }
+                };
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -37,11 +43,11 @@ public class PersonDAO {
             stmt.executeUpdate();
             ResultSet generatedKeys = stmt.getGeneratedKeys();
             if (generatedKeys.next()) {
-                return generatedKeys.getInt(1); // Trả về ID đã tạo
+                return generatedKeys.getInt(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1; // Trả về -1 nếu không thành công
+        return -1;
     }
 }

@@ -1,7 +1,7 @@
 package main.java.com.university.main;
 
-import com.university.dao.*;
-import com.university.model.*;
+import main.java.com.university.dao.*;
+import main.java.com.university.model.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,28 +20,14 @@ public class UniversityManagementSystem {
         SubjectDAO subjectDAO = new SubjectDAO();
 
         // Tạo dữ liệu mẫu
-        Person person1 = new Person("Nguyen Van A", LocalDate.of(1995, 5, 20), "Nam") {
-            @Override
-            public void displayInfo() {
-                System.out.println("Person: " + getName());
-            }
-        };
-        int person1ID = personDAO.savePerson(person1);
-
-        Person person2 = new Person("Tran Thi B", LocalDate.of(1980, 10, 10), "Nu") {
-            @Override
-            public void displayInfo() {
-                System.out.println("Person: " + getName());
-            }
-        };
-        int person2ID = personDAO.savePerson(person2);
-
         Student student = new Student("Nguyen Van A", LocalDate.of(1995, 5, 20), "Nam", 1);
+        int person1ID = personDAO.savePerson(student);
         student.setId(person1ID);
         studentDAO.saveStudent(student);
         students.add(student);
 
         Lecturer lecturer = new Lecturer("Tran Thi B", LocalDate.of(1980, 10, 10), "Nu", 1);
+        int person2ID = personDAO.savePerson(lecturer);
         lecturer.setId(person2ID);
         lecturerDAO.saveLecturer(lecturer);
         lecturers.add(lecturer);

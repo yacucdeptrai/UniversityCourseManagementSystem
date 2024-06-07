@@ -51,7 +51,7 @@ public class LecturerDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, lecturer.getLecturerID());
-            stmt.setInt(2, lecturer.getId()); // Chú ý: ID của person đã được tạo
+            stmt.setInt(2, lecturer.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
