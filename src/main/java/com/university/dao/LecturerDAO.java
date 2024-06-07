@@ -10,19 +10,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LecturerDAO {
-    public Lecturer getLecturerById(int id) {
-        String query = "SELECT * FROM lecturers INNER JOIN persons ON lecturers.person_id = persons.id WHERE lecturer_id = ?";
+    public int saveLecturerAndReturnID(Lecturer lecturer) {
+        String query = "INSERT INTO lecturers (person_id) VALUES (?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, lecturer.getId());
+            stmt.executeUpdate();
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1); // Trả về ID tự sinh của giảng viên
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public Lecturer getLecturerById(int lecturerId) {
+        String query = "SELECT lecturers.*, persons.* FROM lecturers JOIN persons ON lecturers.person_id = persons.id WHERE lecturer_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new Lecturer(
-                        rs.getString("name"),
-                        rs.getDate("date_of_birth").toLocalDate(),
-                        rs.getString("gender"),
-                        rs.getInt("lecturer_id")
-                );
+            stmt.setInt(1, lecturerId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Lecturer(
+                            rs.getString("name"),
+                            rs.getDate("date_of_birth").toLocalDate(),
+                            rs.getString("gender"),
+                            rs.getInt("lecturer_id")
+                    );
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

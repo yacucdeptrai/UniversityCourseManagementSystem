@@ -17,7 +17,7 @@ public class PersonDAO {
             stmt.executeUpdate();
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getInt(1); // Trả về ID tự sinh
+                    return rs.getInt(1); // Trả về ID tự sinh của người
                 }
             }
         } catch (SQLException e) {
