@@ -5,7 +5,7 @@ import main.java.com.university.ui.EditStudentUI;
 import main.java.com.university.ui.AddLecturerUI;
 import main.java.com.university.ui.AddSubjectUI;
 import main.java.com.university.ui.ManageEnrollmentUI;
-
+// none
 import javax.swing.*;
 
 public class UniversityManagementSystem {
