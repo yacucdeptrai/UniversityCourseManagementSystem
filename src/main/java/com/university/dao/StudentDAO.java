@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StudentDAO {
     public Student getStudentById(int id) {
@@ -55,6 +57,28 @@ public class StudentDAO {
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("Failed to save student: " + e.getMessage());
         }
+    }
+
+    public List<Student> getAllStudents() {
+        List<Student> students = new ArrayList<>();
+        String query = "SELECT * FROM students INNER JOIN persons ON students.person_id = persons.id";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Student student = new Student(
+                        rs.getString("name"),
+                        rs.getDate("date_of_birth").toLocalDate(),
+                        rs.getString("gender"),
+                        rs.getInt("student_id")
+                );
+                students.add(student);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
     }
 }

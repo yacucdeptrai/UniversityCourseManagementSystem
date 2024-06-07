@@ -11,7 +11,11 @@ public class Subject {
         this.lecturer = lecturer;
     }
 
-    // Getter và Setter
+    @Override
+    public String toString() {
+        return subjectName + " (ID: " + subjectID + ")";
+    }
+
     public int getSubjectID() {
         return subjectID;
     }

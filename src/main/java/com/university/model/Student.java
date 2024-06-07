@@ -16,7 +16,11 @@ public class Student extends Person {
         System.out.println("Student ID: " + getStudentID());
     }
 
-    // Getter và Setter
+    @Override
+    public String toString() {
+        return getName() + " (ID: " + studentID + ")";
+    }
+
     public int getStudentID() {
         return studentID;
     }
