@@ -18,7 +18,7 @@ public class UniversityManagementSystem {
         btnAddStudent.setBounds(10, 10, 160, 30);
         mainFrame.add(btnAddStudent);
 
-        JButton btnEditStudent = new JButton("Edit Student");
+        JButton btnEditStudent = new JButton("Manage Student");
         btnEditStudent.setBounds(10, 50, 160, 30);
         mainFrame.add(btnEditStudent);
 

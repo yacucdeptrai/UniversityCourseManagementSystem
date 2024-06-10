@@ -34,7 +34,17 @@ CREATE TABLE IF NOT EXISTS subjects (
     FOREIGN KEY (lecturer_id) REFERENCES lecturers(lecturer_id) ON DELETE CASCADE
 );
 
+-- Tạo bảng 'enrollments'
+CREATE TABLE IF NOT EXISTS enrollments (
+    student_id INT,
+    subject_id INT,
+    PRIMARY KEY (student_id, subject_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE
+);
+
 -- Xóa dữ liệu cũ (Chỉ sử dụng khi cần làm sạch dữ liệu)
+DELETE FROM enrollments;
 DELETE FROM subjects;
 DELETE FROM students;
 DELETE FROM lecturers;
