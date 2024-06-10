@@ -1,6 +1,5 @@
 package main.java.com.university.ui;
 
-import main.java.com.university.dao.PersonDAO;
 import main.java.com.university.dao.StudentDAO;
 import main.java.com.university.model.Student;
 
@@ -9,93 +8,125 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.util.List;
 
 public class EditStudentUI extends JFrame {
+    private JComboBox<Student> studentComboBox;
     private JTextField nameField;
     private JTextField dobField;
     private JTextField genderField;
-    private JTextField studentIDField;
 
-    public EditStudentUI(Student student) {
-        if (student == null) {
-            JOptionPane.showMessageDialog(null, "Student not found!", "Error", JOptionPane.ERROR_MESSAGE);
-            dispose();
-            return;
-        }
-
+    public EditStudentUI() {
         setTitle("Edit Student");
         setBounds(100, 100, 400, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
 
+        JLabel lblSelectStudent = new JLabel("Select Student:");
+        lblSelectStudent.setBounds(10, 20, 100, 25);
+        getContentPane().add(lblSelectStudent);
+
+        studentComboBox = new JComboBox<>();
+        studentComboBox.setBounds(120, 20, 250, 25);
+        getContentPane().add(studentComboBox);
+
+        studentComboBox.addActionListener(e -> loadStudentData());
+
         JLabel lblName = new JLabel("Name:");
-        lblName.setBounds(10, 20, 80, 25);
+        lblName.setBounds(10, 60, 80, 25);
         getContentPane().add(lblName);
 
-        nameField = new JTextField(student.getName());
-        nameField.setBounds(100, 20, 250, 25);
+        nameField = new JTextField();
+        nameField.setBounds(120, 60, 250, 25);
         getContentPane().add(nameField);
 
         JLabel lblDob = new JLabel("Date of Birth (YYYY-MM-DD):");
-        lblDob.setBounds(10, 60, 200, 25);
+        lblDob.setBounds(10, 100, 200, 25);
         getContentPane().add(lblDob);
 
-        dobField = new JTextField(student.getDateOfBirth().toString());
-        dobField.setBounds(220, 60, 130, 25);
+        dobField = new JTextField();
+        dobField.setBounds(220, 100, 150, 25);
         getContentPane().add(dobField);
 
         JLabel lblGender = new JLabel("Gender:");
-        lblGender.setBounds(10, 100, 80, 25);
+        lblGender.setBounds(10, 140, 80, 25);
         getContentPane().add(lblGender);
 
-        genderField = new JTextField(student.getGender());
-        genderField.setBounds(100, 100, 250, 25);
+        genderField = new JTextField();
+        genderField.setBounds(120, 140, 250, 25);
         getContentPane().add(genderField);
-
-        studentIDField = new JTextField(String.valueOf(student.getStudentID()));
-        studentIDField.setBounds(100, 140, 250, 25);
-        studentIDField.setVisible(false); // Ẩn trường studentID vì không cần chỉnh sửa
-        getContentPane().add(studentIDField);
 
         JButton btnEditStudent = new JButton("Edit Student");
         btnEditStudent.setBounds(10, 180, 140, 25);
         getContentPane().add(btnEditStudent);
 
-        btnEditStudent.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String name = nameField.getText();
-                LocalDate dob = LocalDate.parse(dobField.getText());
-                String gender = genderField.getText();
-                int studentID = Integer.parseInt(studentIDField.getText());
+        btnEditStudent.addActionListener(e -> updateStudent());
 
-                Student updatedStudent = new Student(name, dob, gender, studentID);
-                updatedStudent.setId(student.getId());
+        JButton btnDeleteStudent = new JButton("Delete Student");
+        btnDeleteStudent.setBounds(170, 180, 140, 25);
+        getContentPane().add(btnDeleteStudent);
 
-                PersonDAO personDAO = new PersonDAO();
+        btnDeleteStudent.addActionListener(e -> deleteStudent());
+
+        loadStudents();
+    }
+
+    private void loadStudents() {
+        StudentDAO studentDAO = new StudentDAO();
+        List<Student> students = studentDAO.getAllStudents();
+        for (Student student : students) {
+            studentComboBox.addItem(student);
+        }
+    }
+
+    private void loadStudentData() {
+        Student student = (Student) studentComboBox.getSelectedItem();
+        if (student != null) {
+            nameField.setText(student.getName());
+            dobField.setText(student.getDateOfBirth().toString());
+            genderField.setText(student.getGender());
+        }
+    }
+
+    private void updateStudent() {
+        Student student = (Student) studentComboBox.getSelectedItem();
+        if (student != null) {
+            String name = nameField.getText();
+            LocalDate dob = LocalDate.parse(dobField.getText());
+            String gender = genderField.getText();
+
+            student.setName(name);
+            student.setDateOfBirth(dob);
+            student.setGender(gender);
+
+            StudentDAO studentDAO = new StudentDAO();
+            studentDAO.updateStudent(student);
+
+            JOptionPane.showMessageDialog(this, "Student updated successfully!");
+        }
+    }
+
+    private void deleteStudent() {
+        Student student = (Student) studentComboBox.getSelectedItem();
+        if (student != null) {
+            int confirmation = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this student?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+            if (confirmation == JOptionPane.YES_OPTION) {
                 StudentDAO studentDAO = new StudentDAO();
+                studentDAO.deleteStudent(student.getStudentID());
 
-                personDAO.updatePerson(updatedStudent);
-                studentDAO.updateStudent(updatedStudent);
-
-                JOptionPane.showMessageDialog(null, "Student updated successfully!");
+                JOptionPane.showMessageDialog(this, "Student deleted successfully!");
                 dispose();
             }
-        });
+        }
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    // Test with a sample student object (chỉnh sửa với studentID thực tế)
-                    StudentDAO studentDAO = new StudentDAO();
-                    Student student = studentDAO.getStudentById(999); // Thay thế bằng ID sinh viên thực tế
-                    EditStudentUI frame = new EditStudentUI(student);
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                EditStudentUI frame = new EditStudentUI();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

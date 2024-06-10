@@ -10,6 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LecturerDAO {
+    public void saveLecturer(Lecturer lecturer) {
+        String query = "INSERT INTO lecturers (lecturer_id, person_id) VALUES (?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, lecturer.getLecturerID());
+            stmt.setInt(2, lecturer.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Lecturer getLecturerById(int id) {
         String query = "SELECT * FROM lecturers INNER JOIN persons ON lecturers.person_id = persons.id WHERE lecturer_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -41,23 +53,6 @@ public class LecturerDAO {
             e.printStackTrace();
         }
         return false;
-    }
-
-    public void saveLecturer(Lecturer lecturer) {
-        if (existsById(lecturer.getLecturerID())) {
-            System.out.println("Lecturer with ID " + lecturer.getLecturerID() + " already exists.");
-            return;
-        }
-
-        String query = "INSERT INTO lecturers (lecturer_id, person_id) VALUES (?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, lecturer.getLecturerID());
-            stmt.setInt(2, lecturer.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public List<Lecturer> getAllLecturers() {

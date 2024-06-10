@@ -70,6 +70,12 @@ public class AddStudentUI extends JFrame {
                 PersonDAO personDAO = new PersonDAO();
                 StudentDAO studentDAO = new StudentDAO();
 
+                // Kiểm tra ID đã tồn tại
+                if (studentDAO.getStudentById(studentID) != null) {
+                    JOptionPane.showMessageDialog(null, "Student ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 int personID = personDAO.savePerson(student);
                 student.setId(personID);
                 studentDAO.saveStudent(student);
@@ -81,14 +87,12 @@ public class AddStudentUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    AddStudentUI frame = new AddStudentUI();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                AddStudentUI frame = new AddStudentUI();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

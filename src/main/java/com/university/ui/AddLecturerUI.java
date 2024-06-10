@@ -70,6 +70,12 @@ public class AddLecturerUI extends JFrame {
                 PersonDAO personDAO = new PersonDAO();
                 LecturerDAO lecturerDAO = new LecturerDAO();
 
+                // Kiểm tra ID đã tồn tại
+                if (lecturerDAO.getLecturerById(lecturerID) != null) {
+                    JOptionPane.showMessageDialog(null, "Lecturer ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 int personID = personDAO.savePerson(lecturer);
                 lecturer.setId(personID);
                 lecturerDAO.saveLecturer(lecturer);
@@ -81,14 +87,12 @@ public class AddLecturerUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    AddLecturerUI frame = new AddLecturerUI();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                AddLecturerUI frame = new AddLecturerUI();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
