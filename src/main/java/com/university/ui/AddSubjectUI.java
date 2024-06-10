@@ -1,9 +1,9 @@
 package main.java.com.university.ui;
 
-import main.java.com.university.dao.SubjectDAO;
-import main.java.com.university.model.Subject;
 import main.java.com.university.dao.LecturerDAO;
+import main.java.com.university.dao.SubjectDAO;
 import main.java.com.university.model.Lecturer;
+import main.java.com.university.model.Subject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class AddSubjectUI extends JFrame { // Kế thừa từ JFrame
+public class AddSubjectUI extends JFrame {
     private JTextField subjectNameField;
     private JTextField subjectIDField;
     private JComboBox<Lecturer> lecturerComboBox;
@@ -38,9 +38,9 @@ public class AddSubjectUI extends JFrame { // Kế thừa từ JFrame
         subjectIDField.setBounds(120, 60, 250, 25);
         getContentPane().add(subjectIDField);
 
-        JLabel lblLecturer = new JLabel("Select Lecturer:");
-        lblLecturer.setBounds(10, 100, 100, 25);
-        getContentPane().add(lblLecturer);
+        JLabel lblSelectLecturer = new JLabel("Select Lecturer:");
+        lblSelectLecturer.setBounds(10, 100, 100, 25);
+        getContentPane().add(lblSelectLecturer);
 
         lecturerComboBox = new JComboBox<>();
         lecturerComboBox.setBounds(120, 100, 250, 25);
@@ -54,15 +54,31 @@ public class AddSubjectUI extends JFrame { // Kế thừa từ JFrame
             @Override
             public void actionPerformed(ActionEvent e) {
                 String subjectName = subjectNameField.getText();
-                int subjectID = Integer.parseInt(subjectIDField.getText());
+                int subjectID;
+                try {
+                    subjectID = Integer.parseInt(subjectIDField.getText());
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid Subject ID", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 Lecturer selectedLecturer = (Lecturer) lecturerComboBox.getSelectedItem();
 
-                Subject subject = new Subject(subjectID, subjectName, selectedLecturer);
-                SubjectDAO subjectDAO = new SubjectDAO();
-                subjectDAO.saveSubject(subject);
+                if (selectedLecturer != null) {
+                    Subject subject = new Subject(subjectID, subjectName, selectedLecturer);
+                    SubjectDAO subjectDAO = new SubjectDAO();
 
-                JOptionPane.showMessageDialog(null, "Subject added successfully!");
-                dispose();
+                    // Kiểm tra ID đã tồn tại
+                    if (subjectDAO.getSubjectById(subjectID) != null) {
+                        JOptionPane.showMessageDialog(null, "Subject ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    subjectDAO.saveSubject(subject);
+                    JOptionPane.showMessageDialog(null, "Subject added successfully!");
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please select a lecturer", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -78,14 +94,12 @@ public class AddSubjectUI extends JFrame { // Kế thừa từ JFrame
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    AddSubjectUI frame = new AddSubjectUI();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                AddSubjectUI frame = new AddSubjectUI();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

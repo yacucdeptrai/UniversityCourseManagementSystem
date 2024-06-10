@@ -57,18 +57,17 @@ public class LecturerDAO {
 
     public List<Lecturer> getAllLecturers() {
         List<Lecturer> lecturers = new ArrayList<>();
-        String query = "SELECT * FROM lecturers INNER JOIN persons ON lecturers.person_id = persons.id";
+        String query = "SELECT lecturers.*, persons.* FROM lecturers JOIN persons ON lecturers.person_id = persons.id";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                Lecturer lecturer = new Lecturer(
+                lecturers.add(new Lecturer(
                         rs.getString("name"),
                         rs.getDate("date_of_birth").toLocalDate(),
                         rs.getString("gender"),
                         rs.getInt("lecturer_id")
-                );
-                lecturers.add(lecturer);
+                ));
             }
         } catch (SQLException e) {
             e.printStackTrace();

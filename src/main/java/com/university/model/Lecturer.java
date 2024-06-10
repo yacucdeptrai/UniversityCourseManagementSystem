@@ -16,7 +16,12 @@ public class Lecturer extends Person {
         System.out.println("Lecturer ID: " + getLecturerID());
     }
 
-    // Getter và Setter
+    @Override
+    public String toString() {
+        return getName() + " (ID: " + lecturerID + ")";
+    }
+
+    // Getters và Setters
     public int getLecturerID() {
         return lecturerID;
     }
