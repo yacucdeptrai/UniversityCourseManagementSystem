@@ -12,13 +12,15 @@ import java.time.LocalDate;
 
 public class AddStudentUI extends JFrame {
     private JTextField nameField;
-    private JTextField dobField;
+    private JComboBox<Integer> dayComboBox;
+    private JComboBox<Integer> monthComboBox;
+    private JComboBox<Integer> yearComboBox;
     private JTextField studentIDField;
     private JComboBox<String> genderComboBox;
 
     public AddStudentUI() {
         setTitle("Add New Student");
-        setBounds(100, 100, 400, 300);
+        setBounds(100, 100, 400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
 
@@ -30,13 +32,21 @@ public class AddStudentUI extends JFrame {
         nameField.setBounds(100, 20, 250, 25);
         getContentPane().add(nameField);
 
-        JLabel lblDob = new JLabel("Date of Birth (YYYY-MM-DD):");
+        JLabel lblDob = new JLabel("Date of Birth:");
         lblDob.setBounds(10, 60, 200, 25);
         getContentPane().add(lblDob);
 
-        dobField = new JTextField();
-        dobField.setBounds(220, 60, 130, 25);
-        getContentPane().add(dobField);
+        dayComboBox = new JComboBox<>(createNumberArray(1, 31));
+        dayComboBox.setBounds(100, 60, 70, 25);
+        getContentPane().add(dayComboBox);
+
+        monthComboBox = new JComboBox<>(createNumberArray(1, 12));
+        monthComboBox.setBounds(180, 60, 70, 25);
+        getContentPane().add(monthComboBox);
+
+        yearComboBox = new JComboBox<>(createNumberArray(1900, 2024));
+        yearComboBox.setBounds(260, 60, 90, 25);
+        getContentPane().add(yearComboBox);
 
         JLabel lblGender = new JLabel("Gender:");
         lblGender.setBounds(10, 100, 80, 25);
@@ -62,7 +72,10 @@ public class AddStudentUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String name = nameField.getText();
-                LocalDate dob = LocalDate.parse(dobField.getText());
+                int day = (int) dayComboBox.getSelectedItem();
+                int month = (int) monthComboBox.getSelectedItem();
+                int year = (int) yearComboBox.getSelectedItem();
+                LocalDate dob = LocalDate.of(year, month, day);
                 String gender = (String) genderComboBox.getSelectedItem();
                 int studentID = Integer.parseInt(studentIDField.getText());
 
@@ -84,6 +97,14 @@ public class AddStudentUI extends JFrame {
                 dispose();
             }
         });
+    }
+
+    private Integer[] createNumberArray(int start, int end) {
+        Integer[] numbers = new Integer[end - start + 1];
+        for (int i = start; i <= end; i++) {
+            numbers[i - start] = i;
+        }
+        return numbers;
     }
 
     public static void main(String[] args) {

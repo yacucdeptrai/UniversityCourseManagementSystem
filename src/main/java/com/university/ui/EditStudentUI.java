@@ -13,12 +13,14 @@ import java.util.List;
 public class EditStudentUI extends JFrame {
     private JComboBox<Student> studentComboBox;
     private JTextField nameField;
-    private JTextField dobField;
+    private JComboBox<Integer> dayComboBox;
+    private JComboBox<Integer> monthComboBox;
+    private JComboBox<Integer> yearComboBox;
     private JComboBox<String> genderComboBox;
 
     public EditStudentUI() {
         setTitle("Edit Student");
-        setBounds(100, 100, 400, 300);
+        setBounds(100, 100, 400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
 
@@ -40,13 +42,21 @@ public class EditStudentUI extends JFrame {
         nameField.setBounds(120, 60, 250, 25);
         getContentPane().add(nameField);
 
-        JLabel lblDob = new JLabel("Date of Birth (YYYY-MM-DD):");
+        JLabel lblDob = new JLabel("Date of Birth:");
         lblDob.setBounds(10, 100, 200, 25);
         getContentPane().add(lblDob);
 
-        dobField = new JTextField();
-        dobField.setBounds(220, 100, 150, 25);
-        getContentPane().add(dobField);
+        dayComboBox = new JComboBox<>(createNumberArray(1, 31));
+        dayComboBox.setBounds(120, 100, 70, 25);
+        getContentPane().add(dayComboBox);
+
+        monthComboBox = new JComboBox<>(createNumberArray(1, 12));
+        monthComboBox.setBounds(200, 100, 70, 25);
+        getContentPane().add(monthComboBox);
+
+        yearComboBox = new JComboBox<>(createNumberArray(1900, 2024));
+        yearComboBox.setBounds(280, 100, 90, 25);
+        getContentPane().add(yearComboBox);
 
         JLabel lblGender = new JLabel("Gender:");
         lblGender.setBounds(10, 140, 80, 25);
@@ -70,7 +80,10 @@ public class EditStudentUI extends JFrame {
                 Student selectedStudent = (Student) studentComboBox.getSelectedItem();
                 if (selectedStudent != null) {
                     selectedStudent.setName(nameField.getText());
-                    selectedStudent.setDateOfBirth(LocalDate.parse(dobField.getText()));
+                    int day = (int) dayComboBox.getSelectedItem();
+                    int month = (int) monthComboBox.getSelectedItem();
+                    int year = (int) yearComboBox.getSelectedItem();
+                    selectedStudent.setDateOfBirth(LocalDate.of(year, month, day));
                     selectedStudent.setGender((String) genderComboBox.getSelectedItem());
 
                     StudentDAO studentDAO = new StudentDAO();
@@ -107,7 +120,10 @@ public class EditStudentUI extends JFrame {
         Student selectedStudent = (Student) studentComboBox.getSelectedItem();
         if (selectedStudent != null) {
             nameField.setText(selectedStudent.getName());
-            dobField.setText(selectedStudent.getDateOfBirth().toString());
+            LocalDate dob = selectedStudent.getDateOfBirth();
+            dayComboBox.setSelectedItem(dob.getDayOfMonth());
+            monthComboBox.setSelectedItem(dob.getMonthValue());
+            yearComboBox.setSelectedItem(dob.getYear());
             genderComboBox.setSelectedItem(selectedStudent.getGender());
         }
     }
@@ -118,6 +134,14 @@ public class EditStudentUI extends JFrame {
         for (Student student : students) {
             studentComboBox.addItem(student);
         }
+    }
+
+    private Integer[] createNumberArray(int start, int end) {
+        Integer[] numbers = new Integer[end - start + 1];
+        for (int i = start; i <= end; i++) {
+            numbers[i - start] = i;
+        }
+        return numbers;
     }
 
     public static void main(String[] args) {
