@@ -12,7 +12,7 @@ import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.util.List;
 
-public class EditStudentUI extends JFrame {
+public class StudentManagementUI extends JFrame {
     private JComboBox<Student> studentComboBox;
     private JTextField nameField;
     private JComboBox<Integer> dayComboBox;
@@ -21,12 +21,13 @@ public class EditStudentUI extends JFrame {
     private JComboBox<String> genderComboBox;
     private JList<Subject> subjectList;
     private DefaultListModel<Subject> subjectListModel;
-    private JButton btnAddSubject;
+    private JButton btnEnrollSubject;
     private JButton btnRemoveSubject;
+    private JButton btnDeleteStudent;
 
-    public EditStudentUI() {
-        setTitle("Edit Student");
-        setBounds(100, 100, 600, 500);  // Adjust size to fit new components
+    public StudentManagementUI() {
+        setTitle("Student Management");
+        setBounds(100, 100, 600, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
 
@@ -60,7 +61,7 @@ public class EditStudentUI extends JFrame {
         monthComboBox.setBounds(200, 100, 70, 25);
         getContentPane().add(monthComboBox);
 
-        yearComboBox = new JComboBox<>(createNumberArray(1900, 2024));
+        yearComboBox = new JComboBox<>(createNumberArray(1900, 2023));
         yearComboBox.setBounds(280, 100, 90, 25);
         getContentPane().add(yearComboBox);
 
@@ -82,18 +83,18 @@ public class EditStudentUI extends JFrame {
         scrollPane.setBounds(120, 180, 250, 100);
         getContentPane().add(scrollPane);
 
-        btnAddSubject = new JButton("Enrolling Subject");
-        btnAddSubject.setBounds(10, 290, 140, 25);
-        getContentPane().add(btnAddSubject);
+        btnEnrollSubject = new JButton("Enroll Subject");
+        btnEnrollSubject.setBounds(10, 290, 140, 25);
+        getContentPane().add(btnEnrollSubject);
 
         btnRemoveSubject = new JButton("Remove Subject");
         btnRemoveSubject.setBounds(170, 290, 140, 25);
         getContentPane().add(btnRemoveSubject);
 
-        btnAddSubject.addActionListener(new ActionListener() {
+        btnEnrollSubject.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addSubject();
+                enrollSubject();
             }
         });
 
@@ -104,20 +105,9 @@ public class EditStudentUI extends JFrame {
             }
         });
 
-        JButton btnEditStudent = new JButton("Edit Student");
-        btnEditStudent.setBounds(10, 330, 140, 25);
-        getContentPane().add(btnEditStudent);
-
-        JButton btnDeleteStudent = new JButton("Delete Student");
-        btnDeleteStudent.setBounds(170, 330, 140, 25);
+        btnDeleteStudent = new JButton("Delete Student");
+        btnDeleteStudent.setBounds(10, 330, 140, 25);
         getContentPane().add(btnDeleteStudent);
-
-        btnEditStudent.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editStudent();
-            }
-        });
 
         btnDeleteStudent.addActionListener(new ActionListener() {
             @Override
@@ -160,14 +150,14 @@ public class EditStudentUI extends JFrame {
         }
     }
 
-    private void addSubject() {
+    private void enrollSubject() {
         Student selectedStudent = (Student) studentComboBox.getSelectedItem();
         if (selectedStudent != null) {
             List<Subject> allSubjects = new SubjectDAO().getAllSubjects();
             Subject selectedSubject = (Subject) JOptionPane.showInputDialog(
                     this,
-                    "Select Subject to Enrolling:",
-                    "Enrolling Subject",
+                    "Select Subject to Enroll:",
+                    "Enroll Subject",
                     JOptionPane.PLAIN_MESSAGE,
                     null,
                     allSubjects.toArray(),
@@ -190,25 +180,6 @@ public class EditStudentUI extends JFrame {
             new SubjectDAO().removeStudentFromSubject(selectedStudent.getStudentID(), selectedSubject.getSubjectID());
         } else {
             JOptionPane.showMessageDialog(this, "Please select a subject to remove.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void editStudent() {
-        Student selectedStudent = (Student) studentComboBox.getSelectedItem();
-        if (selectedStudent != null) {
-            selectedStudent.setName(nameField.getText());
-            int day = (int) dayComboBox.getSelectedItem();
-            int month = (int) monthComboBox.getSelectedItem();
-            int year = (int) yearComboBox.getSelectedItem();
-            selectedStudent.setDateOfBirth(LocalDate.of(year, month, day));
-            selectedStudent.setGender((String) genderComboBox.getSelectedItem());
-
-            new StudentDAO().updateStudent(selectedStudent);
-
-            JOptionPane.showMessageDialog(this, "Student updated successfully!");
-            dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select a student.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -235,7 +206,7 @@ public class EditStudentUI extends JFrame {
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
-                EditStudentUI frame = new EditStudentUI();
+                StudentManagementUI frame = new StudentManagementUI();
                 frame.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -1,7 +1,7 @@
 package main.java.com.university.main;
 
 import main.java.com.university.ui.AddStudentUI;
-import main.java.com.university.ui.EditStudentUI;
+import main.java.com.university.ui.StudentManagementUI;
 import main.java.com.university.ui.AddLecturerUI;
 import main.java.com.university.ui.AddSubjectUI;
 
@@ -36,8 +36,8 @@ public class UniversityManagementSystem {
         });
 
         btnEditStudent.addActionListener(e -> {
-            EditStudentUI editStudentUI = new EditStudentUI();
-            editStudentUI.setVisible(true);
+            StudentManagementUI studentManagementUI = new StudentManagementUI();
+            studentManagementUI.setVisible(true);
         });
 
         btnAddLecturer.addActionListener(e -> {
