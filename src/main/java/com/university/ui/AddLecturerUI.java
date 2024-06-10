@@ -13,8 +13,8 @@ import java.time.LocalDate;
 public class AddLecturerUI extends JFrame {
     private JTextField nameField;
     private JTextField dobField;
-    private JTextField genderField;
     private JTextField lecturerIDField;
+    private JComboBox<String> genderComboBox;
 
     public AddLecturerUI() {
         setTitle("Add New Lecturer");
@@ -42,9 +42,9 @@ public class AddLecturerUI extends JFrame {
         lblGender.setBounds(10, 100, 80, 25);
         getContentPane().add(lblGender);
 
-        genderField = new JTextField();
-        genderField.setBounds(100, 100, 250, 25);
-        getContentPane().add(genderField);
+        genderComboBox = new JComboBox<>(new String[] {"Male", "Female"});
+        genderComboBox.setBounds(100, 100, 250, 25);
+        getContentPane().add(genderComboBox);
 
         JLabel lblLecturerID = new JLabel("Lecturer ID:");
         lblLecturerID.setBounds(10, 140, 80, 25);
@@ -63,7 +63,7 @@ public class AddLecturerUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String name = nameField.getText();
                 LocalDate dob = LocalDate.parse(dobField.getText());
-                String gender = genderField.getText();
+                String gender = (String) genderComboBox.getSelectedItem();
                 int lecturerID = Integer.parseInt(lecturerIDField.getText());
 
                 Lecturer lecturer = new Lecturer(name, dob, gender, lecturerID);
