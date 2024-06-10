@@ -10,7 +10,7 @@ import javax.swing.*;
 public class UniversityManagementSystem {
     public static void main(String[] args) {
         JFrame mainFrame = new JFrame("University Management System");
-        mainFrame.setSize(600, 400);
+        mainFrame.setSize(420, 200);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setLayout(null);
 
