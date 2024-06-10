@@ -6,6 +6,8 @@ import main.java.com.university.model.Student;
 import main.java.com.university.model.Subject;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,15 +21,15 @@ public class StudentManagementUI extends JFrame {
     private JComboBox<Integer> monthComboBox;
     private JComboBox<Integer> yearComboBox;
     private JComboBox<String> genderComboBox;
-    private JList<Subject> subjectList;
-    private DefaultListModel<Subject> subjectListModel;
+    private JTable subjectTable;
+    private DefaultTableModel subjectTableModel;
     private JButton btnEnrollSubject;
     private JButton btnRemoveSubject;
     private JButton btnDeleteStudent;
 
     public StudentManagementUI() {
         setTitle("Student Management");
-        setBounds(100, 100, 420, 500);
+        setBounds(100, 100, 530, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
 
@@ -77,18 +79,28 @@ public class StudentManagementUI extends JFrame {
         lblSubjects.setBounds(10, 180, 100, 25);
         getContentPane().add(lblSubjects);
 
-        subjectListModel = new DefaultListModel<>();
-        subjectList = new JList<>(subjectListModel);
-        JScrollPane scrollPane = new JScrollPane(subjectList);
-        scrollPane.setBounds(120, 180, 250, 100);
+        subjectTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Lecturer"}, 0);
+        subjectTable = new JTable(subjectTableModel);
+        subjectTable.setRowHeight(25);
+        subjectTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+        // Căn giữa nội dung các cột
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < subjectTable.getColumnCount(); i++) {
+            subjectTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(subjectTable);
+        scrollPane.setBounds(120, 180, 360, 150);  // Điều chỉnh kích thước bảng
         getContentPane().add(scrollPane);
 
         btnEnrollSubject = new JButton("Enroll Subject");
-        btnEnrollSubject.setBounds(10, 290, 140, 25);
+        btnEnrollSubject.setBounds(10, 340, 140, 25);
         getContentPane().add(btnEnrollSubject);
 
         btnRemoveSubject = new JButton("Remove Subject");
-        btnRemoveSubject.setBounds(170, 290, 140, 25);
+        btnRemoveSubject.setBounds(170, 340, 140, 25);
         getContentPane().add(btnRemoveSubject);
 
         btnEnrollSubject.addActionListener(new ActionListener() {
@@ -106,7 +118,7 @@ public class StudentManagementUI extends JFrame {
         });
 
         btnDeleteStudent = new JButton("Delete Student");
-        btnDeleteStudent.setBounds(10, 330, 140, 25);
+        btnDeleteStudent.setBounds(330, 340, 140, 25);
         getContentPane().add(btnDeleteStudent);
 
         btnDeleteStudent.addActionListener(new ActionListener() {
@@ -134,11 +146,15 @@ public class StudentManagementUI extends JFrame {
     }
 
     private void loadStudentSubjects(int studentID) {
-        subjectListModel.clear();
+        subjectTableModel.setRowCount(0);
         SubjectDAO subjectDAO = new SubjectDAO();
         List<Subject> subjects = subjectDAO.getSubjectsByStudentID(studentID);
         for (Subject subject : subjects) {
-            subjectListModel.addElement(subject);
+            subjectTableModel.addRow(new Object[]{
+                    subject.getSubjectID(),
+                    subject.getSubjectName(),
+                    subject.getLecturerName()  // Sử dụng phương thức getLecturerName()
+            });
         }
     }
 
@@ -163,8 +179,12 @@ public class StudentManagementUI extends JFrame {
                     allSubjects.toArray(),
                     allSubjects.get(0)
             );
-            if (selectedSubject != null && !subjectListModel.contains(selectedSubject)) {
-                subjectListModel.addElement(selectedSubject);
+            if (selectedSubject != null && !isSubjectEnrolled(selectedSubject)) {
+                subjectTableModel.addRow(new Object[]{
+                        selectedSubject.getSubjectID(),
+                        selectedSubject.getSubjectName(),
+                        selectedSubject.getLecturerName()  // Sử dụng phương thức getLecturerName()
+                });
                 new SubjectDAO().enrollStudentInSubject(selectedStudent.getStudentID(), selectedSubject.getSubjectID());
             }
         } else {
@@ -174,10 +194,11 @@ public class StudentManagementUI extends JFrame {
 
     private void removeSubject() {
         Student selectedStudent = (Student) studentComboBox.getSelectedItem();
-        Subject selectedSubject = subjectList.getSelectedValue();
-        if (selectedStudent != null && selectedSubject != null) {
-            subjectListModel.removeElement(selectedSubject);
-            new SubjectDAO().removeStudentFromSubject(selectedStudent.getStudentID(), selectedSubject.getSubjectID());
+        int selectedRow = subjectTable.getSelectedRow();
+        if (selectedStudent != null && selectedRow != -1) {
+            int subjectID = (int) subjectTableModel.getValueAt(selectedRow, 0);
+            subjectTableModel.removeRow(selectedRow);
+            new SubjectDAO().removeStudentFromSubject(selectedStudent.getStudentID(), subjectID);
         } else {
             JOptionPane.showMessageDialog(this, "Please select a subject to remove.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -193,6 +214,15 @@ public class StudentManagementUI extends JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Please select a student.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private boolean isSubjectEnrolled(Subject subject) {
+        for (int i = 0; i < subjectTableModel.getRowCount(); i++) {
+            if ((int) subjectTableModel.getValueAt(i, 0) == subject.getSubjectID()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Integer[] createNumberArray(int start, int end) {

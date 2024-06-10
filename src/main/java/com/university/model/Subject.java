@@ -13,7 +13,7 @@ public class Subject {
 
     @Override
     public String toString() {
-        return subjectName + " (ID: " + subjectID + ")";
+        return subjectID + " - " + subjectName + " - " + lecturer.getName();
     }
 
     public int getSubjectID() {
@@ -38,5 +38,10 @@ public class Subject {
 
     public void setLecturer(Lecturer lecturer) {
         this.lecturer = lecturer;
+    }
+
+    // Getter bổ sung để lấy tên giảng viên
+    public String getLecturerName() {
+        return lecturer.getName();
     }
 }

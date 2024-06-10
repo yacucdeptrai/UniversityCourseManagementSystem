@@ -18,7 +18,7 @@ public class AddSubjectUI extends JFrame {
 
     public AddSubjectUI() {
         setTitle("Add New Subject");
-        setBounds(100, 100, 400, 300);
+        setBounds(100, 100, 400, 260);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
 
