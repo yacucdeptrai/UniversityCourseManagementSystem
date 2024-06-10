@@ -4,7 +4,6 @@ import main.java.com.university.ui.AddStudentUI;
 import main.java.com.university.ui.EditStudentUI;
 import main.java.com.university.ui.AddLecturerUI;
 import main.java.com.university.ui.AddSubjectUI;
-import main.java.com.university.ui.ManageEnrollmentUI;
 
 import javax.swing.*;
 
@@ -31,10 +30,6 @@ public class UniversityManagementSystem {
         btnAddSubject.setBounds(200, 50, 160, 30);
         mainFrame.add(btnAddSubject);
 
-        JButton btnManageEnrollment = new JButton("Manage Enrollment");
-        btnManageEnrollment.setBounds(400, 10, 160, 30);
-        mainFrame.add(btnManageEnrollment);
-
         btnAddStudent.addActionListener(e -> {
             AddStudentUI addStudentUI = new AddStudentUI();
             addStudentUI.setVisible(true);
@@ -53,11 +48,6 @@ public class UniversityManagementSystem {
         btnAddSubject.addActionListener(e -> {
             AddSubjectUI addSubjectUI = new AddSubjectUI();
             addSubjectUI.setVisible(true);
-        });
-
-        btnManageEnrollment.addActionListener(e -> {
-            ManageEnrollmentUI manageEnrollmentUI = new ManageEnrollmentUI();
-            manageEnrollmentUI.setVisible(true);
         });
 
         mainFrame.setVisible(true);

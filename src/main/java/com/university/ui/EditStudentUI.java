@@ -60,7 +60,7 @@ public class EditStudentUI extends JFrame {
         monthComboBox.setBounds(200, 100, 70, 25);
         getContentPane().add(monthComboBox);
 
-        yearComboBox = new JComboBox<>(createNumberArray(1900, 2023));
+        yearComboBox = new JComboBox<>(createNumberArray(1900, 2024));
         yearComboBox.setBounds(280, 100, 90, 25);
         getContentPane().add(yearComboBox);
 
@@ -82,7 +82,7 @@ public class EditStudentUI extends JFrame {
         scrollPane.setBounds(120, 180, 250, 100);
         getContentPane().add(scrollPane);
 
-        btnAddSubject = new JButton("Add Subject");
+        btnAddSubject = new JButton("Enrolling Subject");
         btnAddSubject.setBounds(10, 290, 140, 25);
         getContentPane().add(btnAddSubject);
 
@@ -166,8 +166,8 @@ public class EditStudentUI extends JFrame {
             List<Subject> allSubjects = new SubjectDAO().getAllSubjects();
             Subject selectedSubject = (Subject) JOptionPane.showInputDialog(
                     this,
-                    "Select Subject to Add:",
-                    "Add Subject",
+                    "Select Subject to Enrolling:",
+                    "Enrolling Subject",
                     JOptionPane.PLAIN_MESSAGE,
                     null,
                     allSubjects.toArray(),
