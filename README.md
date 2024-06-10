@@ -1,3 +1,3 @@
-BTL Cuối Kì Môn Lập Trình Hướng Đối Tượng
+My OPP Last Term Big Assingment
 
-Sử dụng ItelliJ IDEA
+Using ItelliJ IDEA For Making This Project
