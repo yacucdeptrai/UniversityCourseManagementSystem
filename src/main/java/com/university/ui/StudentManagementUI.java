@@ -27,7 +27,7 @@ public class StudentManagementUI extends JFrame {
 
     public StudentManagementUI() {
         setTitle("Student Management");
-        setBounds(100, 100, 600, 500);
+        setBounds(100, 100, 420, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
 
