@@ -1,7 +1,9 @@
 package main.java.com.university.ui;
 
 import main.java.com.university.dao.StudentDAO;
+import main.java.com.university.dao.SubjectDAO;
 import main.java.com.university.model.Student;
+import main.java.com.university.model.Subject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,10 +19,14 @@ public class EditStudentUI extends JFrame {
     private JComboBox<Integer> monthComboBox;
     private JComboBox<Integer> yearComboBox;
     private JComboBox<String> genderComboBox;
+    private JList<Subject> subjectList;
+    private DefaultListModel<Subject> subjectListModel;
+    private JButton btnAddSubject;
+    private JButton btnRemoveSubject;
 
     public EditStudentUI() {
         setTitle("Edit Student");
-        setBounds(100, 100, 400, 400);
+        setBounds(100, 100, 600, 500);  // Adjust size to fit new components
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(null);
 
@@ -54,7 +60,7 @@ public class EditStudentUI extends JFrame {
         monthComboBox.setBounds(200, 100, 70, 25);
         getContentPane().add(monthComboBox);
 
-        yearComboBox = new JComboBox<>(createNumberArray(1900, 2024));
+        yearComboBox = new JComboBox<>(createNumberArray(1900, 2023));
         yearComboBox.setBounds(280, 100, 90, 25);
         getContentPane().add(yearComboBox);
 
@@ -66,50 +72,57 @@ public class EditStudentUI extends JFrame {
         genderComboBox.setBounds(120, 140, 250, 25);
         getContentPane().add(genderComboBox);
 
+        JLabel lblSubjects = new JLabel("Subjects:");
+        lblSubjects.setBounds(10, 180, 100, 25);
+        getContentPane().add(lblSubjects);
+
+        subjectListModel = new DefaultListModel<>();
+        subjectList = new JList<>(subjectListModel);
+        JScrollPane scrollPane = new JScrollPane(subjectList);
+        scrollPane.setBounds(120, 180, 250, 100);
+        getContentPane().add(scrollPane);
+
+        btnAddSubject = new JButton("Add Subject");
+        btnAddSubject.setBounds(10, 290, 140, 25);
+        getContentPane().add(btnAddSubject);
+
+        btnRemoveSubject = new JButton("Remove Subject");
+        btnRemoveSubject.setBounds(170, 290, 140, 25);
+        getContentPane().add(btnRemoveSubject);
+
+        btnAddSubject.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addSubject();
+            }
+        });
+
+        btnRemoveSubject.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeSubject();
+            }
+        });
+
         JButton btnEditStudent = new JButton("Edit Student");
-        btnEditStudent.setBounds(10, 180, 140, 25);
+        btnEditStudent.setBounds(10, 330, 140, 25);
         getContentPane().add(btnEditStudent);
 
         JButton btnDeleteStudent = new JButton("Delete Student");
-        btnDeleteStudent.setBounds(170, 180, 140, 25);
+        btnDeleteStudent.setBounds(170, 330, 140, 25);
         getContentPane().add(btnDeleteStudent);
 
         btnEditStudent.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Student selectedStudent = (Student) studentComboBox.getSelectedItem();
-                if (selectedStudent != null) {
-                    selectedStudent.setName(nameField.getText());
-                    int day = (int) dayComboBox.getSelectedItem();
-                    int month = (int) monthComboBox.getSelectedItem();
-                    int year = (int) yearComboBox.getSelectedItem();
-                    selectedStudent.setDateOfBirth(LocalDate.of(year, month, day));
-                    selectedStudent.setGender((String) genderComboBox.getSelectedItem());
-
-                    StudentDAO studentDAO = new StudentDAO();
-                    studentDAO.updateStudent(selectedStudent);
-
-                    JOptionPane.showMessageDialog(null, "Student updated successfully!");
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Please select a student", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                editStudent();
             }
         });
 
         btnDeleteStudent.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Student selectedStudent = (Student) studentComboBox.getSelectedItem();
-                if (selectedStudent != null) {
-                    StudentDAO studentDAO = new StudentDAO();
-                    studentDAO.deleteStudent(selectedStudent.getStudentID());
-
-                    JOptionPane.showMessageDialog(null, "Student deleted successfully!");
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Please select a student", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                deleteStudent();
             }
         });
 
@@ -125,6 +138,17 @@ public class EditStudentUI extends JFrame {
             monthComboBox.setSelectedItem(dob.getMonthValue());
             yearComboBox.setSelectedItem(dob.getYear());
             genderComboBox.setSelectedItem(selectedStudent.getGender());
+
+            loadStudentSubjects(selectedStudent.getStudentID());
+        }
+    }
+
+    private void loadStudentSubjects(int studentID) {
+        subjectListModel.clear();
+        SubjectDAO subjectDAO = new SubjectDAO();
+        List<Subject> subjects = subjectDAO.getSubjectsByStudentID(studentID);
+        for (Subject subject : subjects) {
+            subjectListModel.addElement(subject);
         }
     }
 
@@ -133,6 +157,70 @@ public class EditStudentUI extends JFrame {
         List<Student> students = studentDAO.getAllStudents();
         for (Student student : students) {
             studentComboBox.addItem(student);
+        }
+    }
+
+    private void addSubject() {
+        Student selectedStudent = (Student) studentComboBox.getSelectedItem();
+        if (selectedStudent != null) {
+            List<Subject> allSubjects = new SubjectDAO().getAllSubjects();
+            Subject selectedSubject = (Subject) JOptionPane.showInputDialog(
+                    this,
+                    "Select Subject to Add:",
+                    "Add Subject",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    allSubjects.toArray(),
+                    allSubjects.get(0)
+            );
+            if (selectedSubject != null && !subjectListModel.contains(selectedSubject)) {
+                subjectListModel.addElement(selectedSubject);
+                new SubjectDAO().enrollStudentInSubject(selectedStudent.getStudentID(), selectedSubject.getSubjectID());
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a student first.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void removeSubject() {
+        Student selectedStudent = (Student) studentComboBox.getSelectedItem();
+        Subject selectedSubject = subjectList.getSelectedValue();
+        if (selectedStudent != null && selectedSubject != null) {
+            subjectListModel.removeElement(selectedSubject);
+            new SubjectDAO().removeStudentFromSubject(selectedStudent.getStudentID(), selectedSubject.getSubjectID());
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a subject to remove.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void editStudent() {
+        Student selectedStudent = (Student) studentComboBox.getSelectedItem();
+        if (selectedStudent != null) {
+            selectedStudent.setName(nameField.getText());
+            int day = (int) dayComboBox.getSelectedItem();
+            int month = (int) monthComboBox.getSelectedItem();
+            int year = (int) yearComboBox.getSelectedItem();
+            selectedStudent.setDateOfBirth(LocalDate.of(year, month, day));
+            selectedStudent.setGender((String) genderComboBox.getSelectedItem());
+
+            new StudentDAO().updateStudent(selectedStudent);
+
+            JOptionPane.showMessageDialog(this, "Student updated successfully!");
+            dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a student.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void deleteStudent() {
+        Student selectedStudent = (Student) studentComboBox.getSelectedItem();
+        if (selectedStudent != null) {
+            new StudentDAO().deleteStudent(selectedStudent.getStudentID());
+
+            JOptionPane.showMessageDialog(this, "Student deleted successfully!");
+            dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a student.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
