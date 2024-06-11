@@ -19,7 +19,7 @@ public class UniversityManagementUI extends JFrame {
     private JTable studentTable, lecturerTable, subjectTable;
     private DefaultTableModel studentTableModel, lecturerTableModel, subjectTableModel;
     private JTextField studentSearchField, lecturerSearchField, subjectSearchField;
-    private JButton btnEnrollStudent, btnEditStudent, btnDeleteStudent;
+    private JButton btnEnrollStudent, btnAssignCourse, btnEditStudent, btnDeleteStudent;
     private JButton btnAddLecturer, btnEditLecturer, btnDeleteLecturer;
     private JButton btnAddSubject, btnEditSubject, btnDeleteSubject;
     private JLabel lblStudentInfo;
@@ -51,7 +51,7 @@ public class UniversityManagementUI extends JFrame {
         studentTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
         // Cố định kích thước cột ID
-        studentTable.getColumnModel().getColumn(0).setPreferredWidth(50); // Cố định kích thước 50px cho cột ID
+        studentTable.getColumnModel().getColumn(0).setPreferredWidth(50);
         studentTable.getColumnModel().getColumn(0).setMinWidth(50);
         studentTable.getColumnModel().getColumn(0).setMaxWidth(50);
 
@@ -79,9 +79,11 @@ public class UniversityManagementUI extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnEnrollStudent = new JButton("Enroll Student");
         btnDeleteStudent = new JButton("Delete Student");
+        btnAssignCourse = new JButton("Assign Course");
 
         buttonPanel.add(btnEnrollStudent);
         buttonPanel.add(btnDeleteStudent);
+        buttonPanel.add(btnAssignCourse);
 
         panel.add(buttonPanel, BorderLayout.SOUTH); // Đặt panel chứa nút vào vị trí dưới cùng
 
@@ -101,6 +103,10 @@ public class UniversityManagementUI extends JFrame {
         btnDeleteStudent.addActionListener(e -> {
             deleteStudent();
             loadStudents(); // Làm mới bảng sau khi xóa
+        });
+
+        btnAssignCourse.addActionListener(e -> {
+            assignCourseToStudent();
         });
 
         studentTable.getSelectionModel().addListSelectionListener(event -> {
@@ -162,7 +168,6 @@ public class UniversityManagementUI extends JFrame {
             lblStudentInfo.setText("<html><br/><br/><br/>Select a student to see details.</html>");
         }
     }
-
 
     private JPanel createLecturerManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -319,6 +324,16 @@ public class UniversityManagementUI extends JFrame {
                     subject.getLecturer().getName(),
                     subject.getCredits()
             });
+        }
+    }
+
+    private void assignCourseToStudent() {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow != -1) {
+            int studentID = (int) studentTableModel.getValueAt(selectedRow, 0);
+            new AssignCourseDialog(this, studentID).setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a student to assign course.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
