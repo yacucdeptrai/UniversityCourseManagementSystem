@@ -2,25 +2,26 @@ package main.java.com.university.ui;
 
 import main.java.com.university.dao.StudentDAO;
 import main.java.com.university.model.Student;
+import com.toedter.calendar.JDateChooser;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 public class AddStudentDialog extends JDialog {
     private JTextField nameField;
-    private JComboBox<Integer> dayComboBox;
-    private JComboBox<Integer> monthComboBox;
-    private JComboBox<Integer> yearComboBox;
+    private JDateChooser dateChooser;
     private JComboBox<String> genderComboBox;
     private JTextField studentIdField;
     private JButton btnAddStudent;
 
     public AddStudentDialog(Frame parent) {
         super(parent, "Add Student", true);
-        setLayout(new GridLayout(6, 2, 10, 10));
+        setLayout(new GridLayout(5, 2, 10, 10));
         setSize(400, 300);
         setLocationRelativeTo(parent);
 
@@ -30,15 +31,10 @@ public class AddStudentDialog extends JDialog {
         add(nameField);
 
         JLabel lblDob = new JLabel("Date of Birth:");
-        JPanel dobPanel = new JPanel(new FlowLayout());
-        dayComboBox = new JComboBox<>(createNumberArray(1, 31));
-        monthComboBox = new JComboBox<>(createNumberArray(1, 12));
-        yearComboBox = new JComboBox<>(createNumberArray(1900, 2023));
-        dobPanel.add(dayComboBox);
-        dobPanel.add(monthComboBox);
-        dobPanel.add(yearComboBox);
+        dateChooser = new JDateChooser();
+        dateChooser.setDateFormatString("yyyy-MM-dd");
         add(lblDob);
-        add(dobPanel);
+        add(dateChooser);
 
         JLabel lblGender = new JLabel("Gender:");
         genderComboBox = new JComboBox<>(new String[]{"Male", "Female"});
@@ -63,10 +59,8 @@ public class AddStudentDialog extends JDialog {
 
     private void addStudent() {
         String name = nameField.getText();
-        int day = (Integer) dayComboBox.getSelectedItem();
-        int month = (Integer) monthComboBox.getSelectedItem();
-        int year = (Integer) yearComboBox.getSelectedItem();
-        LocalDate dateOfBirth = LocalDate.of(year, month, day);
+        Date selectedDate = dateChooser.getDate();
+        LocalDate dateOfBirth = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         String gender = (String) genderComboBox.getSelectedItem();
         int studentId = Integer.parseInt(studentIdField.getText());
 
@@ -75,13 +69,5 @@ public class AddStudentDialog extends JDialog {
 
         JOptionPane.showMessageDialog(this, "Student added successfully!");
         dispose();
-    }
-
-    private Integer[] createNumberArray(int start, int end) {
-        Integer[] numbers = new Integer[end - start + 1];
-        for (int i = start; i <= end; i++) {
-            numbers[i - start] = i;
-        }
-        return numbers;
     }
 }
