@@ -91,7 +91,7 @@ public class SubjectDAO {
                     int lecturerID = rs.getInt("lecturer_id");
                     String lecturerName = rs.getString("name");
 
-                    Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID); // Sử dụng Lecturer đơn giản
+                    Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
                     subject = new Subject(subjectID, subjectName, lecturer, credits);
                 }
             }

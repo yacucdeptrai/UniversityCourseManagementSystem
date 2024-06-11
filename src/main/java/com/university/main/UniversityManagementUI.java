@@ -27,7 +27,7 @@ public class UniversityManagementUI extends JFrame {
     public UniversityManagementUI() {
         setTitle("University Management System");
         setLayout(new BorderLayout());
-        setSize(1000, 600);
+        setSize(650, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -44,49 +44,63 @@ public class UniversityManagementUI extends JFrame {
     private JPanel createStudentManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
+        // Tạo bảng sinh viên
         studentTableModel = new DefaultTableModel(new String[]{"ID", "Name"}, 0);
         studentTable = new JTable(studentTableModel);
         studentTable.setRowHeight(25);
         studentTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+        // Cố định kích thước cột ID
+        studentTable.getColumnModel().getColumn(0).setPreferredWidth(50); // Cố định kích thước 50px cho cột ID
+        studentTable.getColumnModel().getColumn(0).setMinWidth(50);
+        studentTable.getColumnModel().getColumn(0).setMaxWidth(50);
+
+        // Căn giữa nội dung bảng
         centerTableData(studentTable);
 
         JScrollPane scrollPane = new JScrollPane(studentTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
+        // Thêm thanh tìm kiếm
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         studentSearchField = new JTextField(20);
         studentSearchField.setToolTipText("Search...");
         searchPanel.add(new JLabel("Search:"));
         searchPanel.add(studentSearchField);
 
+        // Bộ lọc bảng sinh viên
         TableRowSorter<DefaultTableModel> studentSorter = new TableRowSorter<>(studentTableModel);
         studentTable.setRowSorter(studentSorter);
         studentSearchField.getDocument().addDocumentListener(new SearchListener(studentSearchField, studentSorter));
 
         panel.add(searchPanel, BorderLayout.NORTH);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
+        // Thêm panel chứa các nút ở phía dưới
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnEnrollStudent = new JButton("Enroll Student");
         btnDeleteStudent = new JButton("Delete Student");
 
         buttonPanel.add(btnEnrollStudent);
         buttonPanel.add(btnDeleteStudent);
 
-        panel.add(buttonPanel, BorderLayout.SOUTH);
+        panel.add(buttonPanel, BorderLayout.SOUTH); // Đặt panel chứa nút vào vị trí dưới cùng
 
+        // Tạo bảng thông tin sinh viên
         JPanel studentInfoPanel = createStudentInfoPanel();
         panel.add(studentInfoPanel, BorderLayout.EAST);
 
+        // Nạp dữ liệu
         loadStudents();
 
+        // Thêm sự kiện
         btnEnrollStudent.addActionListener(e -> {
             new AddStudentDialog(UniversityManagementUI.this).setVisible(true);
-            loadStudents();
+            loadStudents(); // Làm mới bảng sau khi thêm
         });
 
         btnDeleteStudent.addActionListener(e -> {
             deleteStudent();
-            loadStudents();
+            loadStudents(); // Làm mới bảng sau khi xóa
         });
 
         studentTable.getSelectionModel().addListSelectionListener(event -> {
@@ -103,8 +117,14 @@ public class UniversityManagementUI extends JFrame {
         panel.setBorder(BorderFactory.createTitledBorder("Student Info"));
         panel.setPreferredSize(new Dimension(300, 0));
 
-        lblStudentInfo = new JLabel("<html><br/><br/><br/>Select a student to see details.</html>", SwingConstants.CENTER);
-        panel.add(lblStudentInfo, BorderLayout.CENTER);
+        // Sử dụng JPanel với FlowLayout để căn trái thông tin
+        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        lblStudentInfo = new JLabel();
+        lblStudentInfo.setVerticalAlignment(SwingConstants.TOP); // Đảm bảo văn bản bắt đầu từ đỉnh
+        lblStudentInfo.setFont(new Font("Tahoma", Font.PLAIN, 14)); // Đặt phông chữ cho nhãn
+
+        infoPanel.add(lblStudentInfo);
+        panel.add(infoPanel, BorderLayout.CENTER);
 
         btnEditStudent = new JButton("Edit Student");
         panel.add(btnEditStudent, BorderLayout.SOUTH);
@@ -120,15 +140,17 @@ public class UniversityManagementUI extends JFrame {
     private void updateStudentInfoPanel() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow != -1) {
-            int studentID = (int) studentTableModel.getValueAt(selectedRow, 0);
+            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
+            int modelRow = studentTable.convertRowIndexToModel(selectedRow);
+            int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
             Student student = new StudentDAO().getStudentById(studentID);
 
             StringBuilder info = new StringBuilder("<html>");
-            info.append("ID: ").append(student.getStudentID()).append("<br/>");
-            info.append("Name: ").append(student.getName()).append("<br/>");
-            info.append("Date of Birth: ").append(student.getDateOfBirth()).append("<br/>");
-            info.append("Gender: ").append(student.getGender()).append("<br/>");
-            info.append("Enrolled Subjects: ").append("<br/>");
+            info.append("<b>ID:</b> ").append(student.getStudentID()).append("<br/>");
+            info.append("<b>Name:</b> ").append(student.getName()).append("<br/>");
+            info.append("<b>Date of Birth:</b> ").append(student.getDateOfBirth()).append("<br/>");
+            info.append("<b>Gender:</b> ").append(student.getGender()).append("<br/>");
+            info.append("<b>Enrolled Subjects:</b> ").append("<br/>");
 
             List<Subject> subjects = new SubjectDAO().getSubjectsByStudentID(studentID);
             for (Subject subject : subjects) {
@@ -140,6 +162,7 @@ public class UniversityManagementUI extends JFrame {
             lblStudentInfo.setText("<html><br/><br/><br/>Select a student to see details.</html>");
         }
     }
+
 
     private JPanel createLecturerManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
