@@ -20,7 +20,7 @@ public class AddSubjectDialog extends JDialog {
     public AddSubjectDialog(Frame parent) {
         super(parent, "Add Subject", true);
         setLayout(new GridLayout(4, 2, 10, 10));
-        setSize(400, 300);
+        setSize(300, 200);
         setLocationRelativeTo(parent);
 
         JLabel lblSubjectName = new JLabel("Subject Name:");

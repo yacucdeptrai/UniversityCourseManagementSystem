@@ -24,7 +24,7 @@ public class EditStudentDialog extends JDialog {
         super(parent, "Edit Student", true);
         this.student = student;
         setLayout(new GridLayout(5, 2, 10, 10));
-        setSize(400, 300);
+        setSize(300, 200);
         setLocationRelativeTo(parent);
 
         JLabel lblName = new JLabel("Name:");

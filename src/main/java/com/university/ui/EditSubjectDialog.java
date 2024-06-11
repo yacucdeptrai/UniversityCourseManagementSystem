@@ -22,7 +22,7 @@ public class EditSubjectDialog extends JDialog {
         super(parent, "Edit Subject", true);
         this.subject = subject;
         setLayout(new GridLayout(3, 2, 10, 10));
-        setSize(400, 300);
+        setSize(300, 200);
         setLocationRelativeTo(parent);
 
         JLabel lblSubjectName = new JLabel("Subject Name:");

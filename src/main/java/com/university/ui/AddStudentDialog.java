@@ -22,7 +22,7 @@ public class AddStudentDialog extends JDialog {
     public AddStudentDialog(Frame parent) {
         super(parent, "Add Student", true);
         setLayout(new GridLayout(5, 2, 10, 10));
-        setSize(400, 300);
+        setSize(300, 200);
         setLocationRelativeTo(parent);
 
         JLabel lblName = new JLabel("Name:");
