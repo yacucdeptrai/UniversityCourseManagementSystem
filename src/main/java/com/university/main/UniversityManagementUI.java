@@ -177,7 +177,7 @@ public class UniversityManagementUI extends JFrame {
     }
 
     private void initializeSubjectPanel() {
-        subjectTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Lecturer"}, 0);
+        subjectTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Lecturer","Credits"}, 0);
         subjectTable = new JTable(subjectTableModel);
         subjectTable.setRowHeight(25);
         subjectTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -267,7 +267,8 @@ public class UniversityManagementUI extends JFrame {
             subjectTableModel.addRow(new Object[]{
                     subject.getSubjectID(),
                     subject.getSubjectName(),
-                    subject.getLecturer().getName()
+                    subject.getLecturer().getName(),
+                    subject.getCredits()
             });
         }
     }

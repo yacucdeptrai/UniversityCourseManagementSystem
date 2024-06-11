@@ -19,8 +19,9 @@ public class SubjectDAO {
                 int subjectID = rs.getInt("subject_id");
                 String subjectName = rs.getString("subject_name");
                 int lecturerID = rs.getInt("lecturer_id");
+                int credits = rs.getInt("credits"); // Đọc cột credits
                 Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
-                subjects.add(new Subject(subjectID, subjectName, lecturer));
+                subjects.add(new Subject(subjectID, subjectName, lecturer, credits));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -38,8 +39,9 @@ public class SubjectDAO {
                 if (rs.next()) {
                     String subjectName = rs.getString("subject_name");
                     int lecturerID = rs.getInt("lecturer_id");
+                    int credits = rs.getInt("credits"); // Đọc cột credits
                     Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
-                    subject = new Subject(subjectID, subjectName, lecturer);
+                    subject = new Subject(subjectID, subjectName, lecturer, credits);
                 }
             }
         } catch (SQLException e) {
@@ -49,12 +51,13 @@ public class SubjectDAO {
     }
 
     public void saveSubject(Subject subject) {
-        String sql = "INSERT INTO subjects (subject_id, subject_name, lecturer_id) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO subjects (subject_id, subject_name, lecturer_id, credits) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, subject.getSubjectID());
             pstmt.setString(2, subject.getSubjectName());
             pstmt.setInt(3, subject.getLecturer().getLecturerID());
+            pstmt.setInt(4, subject.getCredits()); // Lưu cột credits
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -62,12 +65,13 @@ public class SubjectDAO {
     }
 
     public void updateSubject(Subject subject) {
-        String sql = "UPDATE subjects SET subject_name = ?, lecturer_id = ? WHERE subject_id = ?";
+        String sql = "UPDATE subjects SET subject_name = ?, lecturer_id = ?, credits = ? WHERE subject_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, subject.getSubjectName());
             pstmt.setInt(2, subject.getLecturer().getLecturerID());
-            pstmt.setInt(3, subject.getSubjectID());
+            pstmt.setInt(3, subject.getCredits()); // Cập nhật cột credits
+            pstmt.setInt(4, subject.getSubjectID());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

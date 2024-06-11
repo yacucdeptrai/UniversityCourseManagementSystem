@@ -4,18 +4,16 @@ public class Subject {
     private int subjectID;
     private String subjectName;
     private Lecturer lecturer;
+    private int credits; // Thêm trường này
 
-    public Subject(int subjectID, String subjectName, Lecturer lecturer) {
+    public Subject(int subjectID, String subjectName, Lecturer lecturer, int credits) {
         this.subjectID = subjectID;
         this.subjectName = subjectName;
         this.lecturer = lecturer;
+        this.credits = credits; // Cập nhật constructor
     }
 
-    @Override
-    public String toString() {
-        return subjectID + " - " + subjectName + " - " + lecturer.getName();
-    }
-
+    // Các phương thức getter và setter
     public int getSubjectID() {
         return subjectID;
     }
@@ -40,8 +38,21 @@ public class Subject {
         this.lecturer = lecturer;
     }
 
-    // Getter bổ sung để lấy tên giảng viên
-    public String getLecturerName() {
-        return lecturer.getName();
+    public int getCredits() {
+        return credits;
+    }
+
+    public void setCredits(int credits) {
+        this.credits = credits;
+    }
+
+    @Override
+    public String toString() {
+        return "Subject{" +
+                "subjectID=" + subjectID +
+                ", subjectName='" + subjectName + '\'' +
+                ", lecturer=" + lecturer +
+                ", credits=" + credits +
+                '}';
     }
 }

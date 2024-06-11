@@ -28,9 +28,10 @@ CREATE TABLE IF NOT EXISTS lecturers (
 
 -- Tạo bảng 'subjects'
 CREATE TABLE IF NOT EXISTS subjects (
-    subject_id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_id INT PRIMARY KEY,
     subject_name VARCHAR(255) NOT NULL,
     lecturer_id INT,
+    credits INT, 
     FOREIGN KEY (lecturer_id) REFERENCES lecturers(lecturer_id) ON DELETE CASCADE
 );
 

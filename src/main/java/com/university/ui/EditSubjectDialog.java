@@ -14,6 +14,7 @@ import java.util.List;
 public class EditSubjectDialog extends JDialog {
     private JTextField subjectNameField;
     private JComboBox<Lecturer> lecturerComboBox;
+    private JTextField creditsField;
     private JButton btnEditSubject;
 
     private Subject subject;
@@ -21,8 +22,8 @@ public class EditSubjectDialog extends JDialog {
     public EditSubjectDialog(Frame parent, Subject subject) {
         super(parent, "Edit Subject", true);
         this.subject = subject;
-        setLayout(new GridLayout(3, 2, 10, 10));
-        setSize(300, 200);
+        setLayout(new GridLayout(5, 2, 10, 10));
+        setSize(400, 300);
         setLocationRelativeTo(parent);
 
         JLabel lblSubjectName = new JLabel("Subject Name:");
@@ -32,8 +33,15 @@ public class EditSubjectDialog extends JDialog {
 
         JLabel lblLecturer = new JLabel("Select Lecturer:");
         lecturerComboBox = new JComboBox<>();
+        loadLecturers();
+        lecturerComboBox.setSelectedItem(subject.getLecturer());
         add(lblLecturer);
         add(lecturerComboBox);
+
+        JLabel lblCredits = new JLabel("Credits:");
+        creditsField = new JTextField(String.valueOf(subject.getCredits()));
+        add(lblCredits);
+        add(creditsField);
 
         btnEditSubject = new JButton("Edit Subject");
         btnEditSubject.addActionListener(new ActionListener() {
@@ -44,9 +52,6 @@ public class EditSubjectDialog extends JDialog {
         });
         add(new JLabel());
         add(btnEditSubject);
-
-        loadLecturers();
-        lecturerComboBox.setSelectedItem(subject.getLecturer());
     }
 
     private void loadLecturers() {
@@ -59,9 +64,11 @@ public class EditSubjectDialog extends JDialog {
     private void editSubject() {
         String subjectName = subjectNameField.getText();
         Lecturer lecturer = (Lecturer) lecturerComboBox.getSelectedItem();
+        int credits = Integer.parseInt(creditsField.getText());
 
         subject.setSubjectName(subjectName);
         subject.setLecturer(lecturer);
+        subject.setCredits(credits);
         new SubjectDAO().updateSubject(subject);
 
         JOptionPane.showMessageDialog(this, "Subject updated successfully!");

@@ -15,12 +15,13 @@ public class AddSubjectDialog extends JDialog {
     private JTextField subjectNameField;
     private JTextField subjectIdField;
     private JComboBox<Lecturer> lecturerComboBox;
+    private JTextField creditsField;
     private JButton btnAddSubject;
 
     public AddSubjectDialog(Frame parent) {
         super(parent, "Add Subject", true);
-        setLayout(new GridLayout(4, 2, 10, 10));
-        setSize(300, 200);
+        setLayout(new GridLayout(5, 2, 10, 10));
+        setSize(400, 300);
         setLocationRelativeTo(parent);
 
         JLabel lblSubjectName = new JLabel("Subject Name:");
@@ -35,8 +36,14 @@ public class AddSubjectDialog extends JDialog {
 
         JLabel lblLecturer = new JLabel("Select Lecturer:");
         lecturerComboBox = new JComboBox<>();
+        loadLecturers();
         add(lblLecturer);
         add(lecturerComboBox);
+
+        JLabel lblCredits = new JLabel("Credits:");
+        creditsField = new JTextField();
+        add(lblCredits);
+        add(creditsField);
 
         btnAddSubject = new JButton("Add Subject");
         btnAddSubject.addActionListener(new ActionListener() {
@@ -47,8 +54,6 @@ public class AddSubjectDialog extends JDialog {
         });
         add(new JLabel());
         add(btnAddSubject);
-
-        loadLecturers();
     }
 
     private void loadLecturers() {
@@ -62,8 +67,9 @@ public class AddSubjectDialog extends JDialog {
         String subjectName = subjectNameField.getText();
         int subjectId = Integer.parseInt(subjectIdField.getText());
         Lecturer lecturer = (Lecturer) lecturerComboBox.getSelectedItem();
+        int credits = Integer.parseInt(creditsField.getText());
 
-        Subject subject = new Subject(subjectId, subjectName, lecturer);
+        Subject subject = new Subject(subjectId, subjectName, lecturer, credits);
         new SubjectDAO().saveSubject(subject);
 
         JOptionPane.showMessageDialog(this, "Subject added successfully!");
