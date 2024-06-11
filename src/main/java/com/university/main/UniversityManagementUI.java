@@ -7,228 +7,228 @@ import main.java.com.university.ui.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 
 public class UniversityManagementUI extends JFrame {
-    private JTabbedPane tabbedPane;
-    private JPanel studentPanel;
-    private JPanel lecturerPanel;
-    private JPanel subjectPanel;
-
-    // Components for Student Management
-    private JTable studentTable;
-    private DefaultTableModel studentTableModel;
-    private JButton btnAddStudent;
-    private JButton btnEditStudent;
-    private JButton btnDeleteStudent;
-
-    // Components for Lecturer Management
-    private JTable lecturerTable;
-    private DefaultTableModel lecturerTableModel;
-    private JButton btnAddLecturer;
-    private JButton btnEditLecturer;
-    private JButton btnDeleteLecturer;
-
-    // Components for Subject Management
-    private JTable subjectTable;
-    private DefaultTableModel subjectTableModel;
-    private JButton btnAddSubject;
-    private JButton btnEditSubject;
-    private JButton btnDeleteSubject;
+    private JTable studentTable, lecturerTable, subjectTable;
+    private DefaultTableModel studentTableModel, lecturerTableModel, subjectTableModel;
+    private JTextField studentSearchField, lecturerSearchField, subjectSearchField;
+    private JButton btnAddStudent, btnEditStudent, btnDeleteStudent;
+    private JButton btnAddLecturer, btnEditLecturer, btnDeleteLecturer;
+    private JButton btnAddSubject, btnEditSubject, btnDeleteSubject;
 
     public UniversityManagementUI() {
         setTitle("University Management System");
-        setBounds(100, 100, 900, 600);
+        setLayout(new BorderLayout());
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        getContentPane().setLayout(null);
 
-        tabbedPane = new JTabbedPane();
-        tabbedPane.setBounds(10, 10, 860, 540);
-        getContentPane().add(tabbedPane);
+        // Tạo các tab cho quản lý sinh viên, giảng viên, môn học
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.add("Student Management", createStudentManagementPanel());
+        tabbedPane.add("Lecturer Management", createLecturerManagementPanel());
+        tabbedPane.add("Subject Management", createSubjectManagementPanel());
 
-        studentPanel = new JPanel();
-        studentPanel.setLayout(null);
-        tabbedPane.addTab("Student Management", null, studentPanel, null);
+        add(tabbedPane, BorderLayout.CENTER);
 
-        lecturerPanel = new JPanel();
-        lecturerPanel.setLayout(null);
-        tabbedPane.addTab("Lecturer Management", null, lecturerPanel, null);
-
-        subjectPanel = new JPanel();
-        subjectPanel.setLayout(null);
-        tabbedPane.addTab("Subject Management", null, subjectPanel, null);
-
-        initializeStudentPanel();
-        initializeLecturerPanel();
-        initializeSubjectPanel();
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
 
-    private void initializeStudentPanel() {
+    private JPanel createStudentManagementPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        // Tạo bảng sinh viên
         studentTableModel = new DefaultTableModel(new String[]{"ID", "Name", "Date of Birth", "Gender"}, 0);
         studentTable = new JTable(studentTableModel);
         studentTable.setRowHeight(25);
         studentTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < studentTable.getColumnCount(); i++) {
-            studentTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
+        // Căn giữa nội dung bảng
+        centerTableData(studentTable);
 
         JScrollPane scrollPane = new JScrollPane(studentTable);
-        scrollPane.setBounds(10, 10, 600, 400);
-        studentPanel.add(scrollPane);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
+        // Thêm thanh tìm kiếm
+        JPanel searchPanel = new JPanel(new FlowLayout());
+        studentSearchField = new JTextField(20);
+        studentSearchField.setToolTipText("Search...");
+        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(studentSearchField);
+
+        // Bộ lọc bảng sinh viên
+        TableRowSorter<DefaultTableModel> studentSorter = new TableRowSorter<>(studentTableModel);
+        studentTable.setRowSorter(studentSorter);
+        studentSearchField.getDocument().addDocumentListener(new SearchListener(studentSearchField, studentSorter));
+
+        panel.add(searchPanel, BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         btnAddStudent = new JButton("Add Student");
-        btnAddStudent.setBounds(620, 10, 200, 25);
-        studentPanel.add(btnAddStudent);
-
         btnEditStudent = new JButton("Edit Student");
-        btnEditStudent.setBounds(620, 50, 200, 25);
-        studentPanel.add(btnEditStudent);
-
         btnDeleteStudent = new JButton("Delete Student");
-        btnDeleteStudent.setBounds(620, 90, 200, 25);
-        studentPanel.add(btnDeleteStudent);
 
+        buttonPanel.add(btnAddStudent);
+        buttonPanel.add(btnEditStudent);
+        buttonPanel.add(btnDeleteStudent);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Nạp dữ liệu
         loadStudents();
 
-        btnAddStudent.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AddStudentDialog(UniversityManagementUI.this).setVisible(true);
-                loadStudents();
-            }
+        // Thêm sự kiện
+        btnAddStudent.addActionListener(e -> {
+            new AddStudentDialog(UniversityManagementUI.this).setVisible(true);
+            loadStudents(); // Làm mới bảng sau khi thêm
         });
 
-        btnEditStudent.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editStudent();
-                loadStudents();
-            }
+        btnEditStudent.addActionListener(e -> {
+            editStudent();
+            loadStudents(); // Làm mới bảng sau khi sửa
         });
 
-        btnDeleteStudent.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deleteStudent();
-                loadStudents();
-            }
+        btnDeleteStudent.addActionListener(e -> {
+            deleteStudent();
+            loadStudents(); // Làm mới bảng sau khi xóa
         });
+
+        return panel;
     }
 
-    private void initializeLecturerPanel() {
+    private JPanel createLecturerManagementPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        // Tạo bảng giảng viên
         lecturerTableModel = new DefaultTableModel(new String[]{"ID", "Name", "Date of Birth", "Gender"}, 0);
         lecturerTable = new JTable(lecturerTableModel);
         lecturerTable.setRowHeight(25);
         lecturerTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < lecturerTable.getColumnCount(); i++) {
-            lecturerTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
+        // Căn giữa nội dung bảng
+        centerTableData(lecturerTable);
 
         JScrollPane scrollPane = new JScrollPane(lecturerTable);
-        scrollPane.setBounds(10, 10, 600, 400);
-        lecturerPanel.add(scrollPane);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
+        // Thêm thanh tìm kiếm
+        JPanel searchPanel = new JPanel(new FlowLayout());
+        lecturerSearchField = new JTextField(20);
+        lecturerSearchField.setToolTipText("Search...");
+        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(lecturerSearchField);
+
+        // Bộ lọc bảng giảng viên
+        TableRowSorter<DefaultTableModel> lecturerSorter = new TableRowSorter<>(lecturerTableModel);
+        lecturerTable.setRowSorter(lecturerSorter);
+        lecturerSearchField.getDocument().addDocumentListener(new SearchListener(lecturerSearchField, lecturerSorter));
+
+        panel.add(searchPanel, BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         btnAddLecturer = new JButton("Add Lecturer");
-        btnAddLecturer.setBounds(620, 10, 200, 25);
-        lecturerPanel.add(btnAddLecturer);
-
         btnEditLecturer = new JButton("Edit Lecturer");
-        btnEditLecturer.setBounds(620, 50, 200, 25);
-        lecturerPanel.add(btnEditLecturer);
-
         btnDeleteLecturer = new JButton("Delete Lecturer");
-        btnDeleteLecturer.setBounds(620, 90, 200, 25);
-        lecturerPanel.add(btnDeleteLecturer);
 
+        buttonPanel.add(btnAddLecturer);
+        buttonPanel.add(btnEditLecturer);
+        buttonPanel.add(btnDeleteLecturer);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Nạp dữ liệu
         loadLecturers();
 
-        btnAddLecturer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AddLecturerDialog(UniversityManagementUI.this).setVisible(true);
-                loadLecturers();
-            }
+        // Thêm sự kiện
+        btnAddLecturer.addActionListener(e -> {
+            new AddLecturerDialog(UniversityManagementUI.this).setVisible(true);
+            loadLecturers(); // Làm mới bảng sau khi thêm
         });
 
-        btnEditLecturer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editLecturer();
-                loadLecturers();
-            }
+        btnEditLecturer.addActionListener(e -> {
+            editLecturer();
+            loadLecturers(); // Làm mới bảng sau khi sửa
         });
 
-        btnDeleteLecturer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deleteLecturer();
-                loadLecturers();
-            }
+        btnDeleteLecturer.addActionListener(e -> {
+            deleteLecturer();
+            loadLecturers(); // Làm mới bảng sau khi xóa
         });
+
+        return panel;
     }
 
-    private void initializeSubjectPanel() {
-        subjectTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Lecturer","Credits"}, 0);
+    private JPanel createSubjectManagementPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        // Tạo bảng môn học
+        subjectTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Lecturer", "Credits"}, 0);
         subjectTable = new JTable(subjectTableModel);
         subjectTable.setRowHeight(25);
         subjectTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < subjectTable.getColumnCount(); i++) {
-            subjectTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
+        // Căn giữa nội dung bảng
+        centerTableData(subjectTable);
 
         JScrollPane scrollPane = new JScrollPane(subjectTable);
-        scrollPane.setBounds(10, 10, 600, 400);
-        subjectPanel.add(scrollPane);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
+        // Thêm thanh tìm kiếm
+        JPanel searchPanel = new JPanel(new FlowLayout());
+        subjectSearchField = new JTextField(20);
+        subjectSearchField.setToolTipText("Search...");
+        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(subjectSearchField);
+
+        // Bộ lọc bảng môn học
+        TableRowSorter<DefaultTableModel> subjectSorter = new TableRowSorter<>(subjectTableModel);
+        subjectTable.setRowSorter(subjectSorter);
+        subjectSearchField.getDocument().addDocumentListener(new SearchListener(subjectSearchField, subjectSorter));
+
+        panel.add(searchPanel, BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         btnAddSubject = new JButton("Add Subject");
-        btnAddSubject.setBounds(620, 10, 200, 25);
-        subjectPanel.add(btnAddSubject);
-
         btnEditSubject = new JButton("Edit Subject");
-        btnEditSubject.setBounds(620, 50, 200, 25);
-        subjectPanel.add(btnEditSubject);
-
         btnDeleteSubject = new JButton("Delete Subject");
-        btnDeleteSubject.setBounds(620, 90, 200, 25);
-        subjectPanel.add(btnDeleteSubject);
 
+        buttonPanel.add(btnAddSubject);
+        buttonPanel.add(btnEditSubject);
+        buttonPanel.add(btnDeleteSubject);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Nạp dữ liệu
         loadSubjects();
 
-        btnAddSubject.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AddSubjectDialog(UniversityManagementUI.this).setVisible(true);
-                loadSubjects();
-            }
+        // Thêm sự kiện
+        btnAddSubject.addActionListener(e -> {
+            new AddSubjectDialog(UniversityManagementUI.this).setVisible(true);
+            loadSubjects(); // Làm mới bảng sau khi thêm
         });
 
-        btnEditSubject.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editSubject();
-                loadSubjects();
-            }
+        btnEditSubject.addActionListener(e -> {
+            editSubject();
+            loadSubjects(); // Làm mới bảng sau khi sửa
         });
 
-        btnDeleteSubject.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deleteSubject();
-                loadSubjects();
-            }
+        btnDeleteSubject.addActionListener(e -> {
+            deleteSubject();
+            loadSubjects(); // Làm mới bảng sau khi xóa
         });
+
+        return panel;
+    }
+
+    private void centerTableData(JTable table) {
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
     }
 
     private void loadStudents() {
@@ -343,13 +343,6 @@ public class UniversityManagementUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-                UniversityManagementUI frame = new UniversityManagementUI();
-                frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        SwingUtilities.invokeLater(() -> new UniversityManagementUI());
     }
 }

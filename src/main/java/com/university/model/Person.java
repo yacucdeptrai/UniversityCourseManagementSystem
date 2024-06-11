@@ -2,8 +2,6 @@ package main.java.com.university.model;
 
 import java.time.LocalDate;
 
-import java.time.LocalDate;
-
 public abstract class Person {
     private String name;
     private LocalDate dateOfBirth;
