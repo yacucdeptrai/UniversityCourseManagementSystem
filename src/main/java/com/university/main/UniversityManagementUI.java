@@ -15,14 +15,15 @@ public class UniversityManagementUI extends JFrame {
     private JTable studentTable, lecturerTable, subjectTable;
     private DefaultTableModel studentTableModel, lecturerTableModel, subjectTableModel;
     private JTextField studentSearchField, lecturerSearchField, subjectSearchField;
-    private JButton btnAddStudent, btnEditStudent, btnDeleteStudent;
+    private JButton btnEnrollStudent, btnEditStudent, btnDeleteStudent;
     private JButton btnAddLecturer, btnEditLecturer, btnDeleteLecturer;
     private JButton btnAddSubject, btnEditSubject, btnDeleteSubject;
+    private JLabel lblStudentInfo;
 
     public UniversityManagementUI() {
         setTitle("University Management System");
         setLayout(new BorderLayout());
-        setSize(800, 600);
+        setSize(1000, 600);  // Cập nhật kích thước cửa sổ để phù hợp với bảng Student Info
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Tạo các tab cho quản lý sinh viên, giảng viên, môn học
@@ -41,7 +42,7 @@ public class UniversityManagementUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
 
         // Tạo bảng sinh viên
-        studentTableModel = new DefaultTableModel(new String[]{"ID", "Name", "Date of Birth", "Gender"}, 0);
+        studentTableModel = new DefaultTableModel(new String[]{"ID", "Name"}, 0);
         studentTable = new JTable(studentTableModel);
         studentTable.setRowHeight(25);
         studentTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -53,7 +54,7 @@ public class UniversityManagementUI extends JFrame {
         panel.add(scrollPane, BorderLayout.CENTER);
 
         // Thêm thanh tìm kiếm
-        JPanel searchPanel = new JPanel(new FlowLayout());
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         studentSearchField = new JTextField(20);
         studentSearchField.setToolTipText("Search...");
         searchPanel.add(new JLabel("Search:"));
@@ -67,21 +68,25 @@ public class UniversityManagementUI extends JFrame {
         panel.add(searchPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        btnAddStudent = new JButton("Add Student");
+        btnEnrollStudent = new JButton("Enroll Student");
         btnEditStudent = new JButton("Edit Student");
         btnDeleteStudent = new JButton("Delete Student");
 
-        buttonPanel.add(btnAddStudent);
+        buttonPanel.add(btnEnrollStudent);
         buttonPanel.add(btnEditStudent);
         buttonPanel.add(btnDeleteStudent);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
+        // Tạo bảng thông tin sinh viên
+        JPanel studentInfoPanel = createStudentInfoPanel();
+        panel.add(studentInfoPanel, BorderLayout.EAST);
+
         // Nạp dữ liệu
         loadStudents();
 
         // Thêm sự kiện
-        btnAddStudent.addActionListener(e -> {
+        btnEnrollStudent.addActionListener(e -> {
             new AddStudentDialog(UniversityManagementUI.this).setVisible(true);
             loadStudents(); // Làm mới bảng sau khi thêm
         });
@@ -96,7 +101,56 @@ public class UniversityManagementUI extends JFrame {
             loadStudents(); // Làm mới bảng sau khi xóa
         });
 
+        studentTable.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
+                updateStudentInfoPanel();
+            }
+        });
+
         return panel;
+    }
+
+    private JPanel createStudentInfoPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Student Info"));
+        panel.setPreferredSize(new Dimension(300, 0));
+
+        lblStudentInfo = new JLabel("<html><br/><br/><br/>Select a student to see details.</html>", SwingConstants.CENTER);
+        panel.add(lblStudentInfo, BorderLayout.CENTER);
+
+        btnEditStudent = new JButton("Edit Student");
+        panel.add(btnEditStudent, BorderLayout.SOUTH);
+
+        btnEditStudent.addActionListener(e -> {
+            editStudent();
+            loadStudents();
+        });
+
+        return panel;
+    }
+
+    private void updateStudentInfoPanel() {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow != -1) {
+            int studentID = (int) studentTableModel.getValueAt(selectedRow, 0);
+            Student student = new StudentDAO().getStudentById(studentID);
+
+            StringBuilder info = new StringBuilder("<html>");
+            info.append("ID: ").append(student.getStudentID()).append("<br/>");
+            info.append("Name: ").append(student.getName()).append("<br/>");
+            info.append("Date of Birth: ").append(student.getDateOfBirth()).append("<br/>");
+            info.append("Gender: ").append(student.getGender()).append("<br/>");
+            info.append("Enrolled Subjects: ").append("<br/>");
+
+            List<Subject> subjects = new SubjectDAO().getSubjectsByStudentID(studentID);
+            for (Subject subject : subjects) {
+                info.append(subject.getSubjectName()).append(" (").append(subject.getCredits()).append(" credits)").append("<br/>");
+            }
+            info.append("</html>");
+            lblStudentInfo.setText(info.toString());
+        } else {
+            lblStudentInfo.setText("<html><br/><br/><br/>Select a student to see details.</html>");
+        }
     }
 
     private JPanel createLecturerManagementPanel() {
@@ -115,7 +169,7 @@ public class UniversityManagementUI extends JFrame {
         panel.add(scrollPane, BorderLayout.CENTER);
 
         // Thêm thanh tìm kiếm
-        JPanel searchPanel = new JPanel(new FlowLayout());
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         lecturerSearchField = new JTextField(20);
         lecturerSearchField.setToolTipText("Search...");
         searchPanel.add(new JLabel("Search:"));
@@ -177,7 +231,7 @@ public class UniversityManagementUI extends JFrame {
         panel.add(scrollPane, BorderLayout.CENTER);
 
         // Thêm thanh tìm kiếm
-        JPanel searchPanel = new JPanel(new FlowLayout());
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         subjectSearchField = new JTextField(20);
         subjectSearchField.setToolTipText("Search...");
         searchPanel.add(new JLabel("Search:"));
@@ -238,9 +292,7 @@ public class UniversityManagementUI extends JFrame {
         for (Student student : students) {
             studentTableModel.addRow(new Object[]{
                     student.getStudentID(),
-                    student.getName(),
-                    student.getDateOfBirth(),
-                    student.getGender()
+                    student.getName()
             });
         }
     }

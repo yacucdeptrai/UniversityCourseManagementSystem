@@ -9,83 +9,168 @@ import java.util.List;
 
 public class SubjectDAO {
 
+    // Lấy danh sách tất cả các môn học
     public List<Subject> getAllSubjects() {
         List<Subject> subjects = new ArrayList<>();
-        String sql = "SELECT * FROM subjects";
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                int subjectID = rs.getInt("subject_id");
-                String subjectName = rs.getString("subject_name");
-                int lecturerID = rs.getInt("lecturer_id");
-                int credits = rs.getInt("credits"); // Đọc cột credits
-                Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
-                subjects.add(new Subject(subjectID, subjectName, lecturer, credits));
+        String query = """
+            SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, l.name, l.date_of_birth, l.gender
+            FROM subjects s
+            JOIN lecturers l ON s.lecturer_id = l.lecturer_id
+        """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                int subjectID = resultSet.getInt("subject_id");
+                String subjectName = resultSet.getString("subject_name");
+                int credits = resultSet.getInt("credits");
+
+                // Tạo đối tượng Lecturer với đầy đủ thông tin
+                int lecturerID = resultSet.getInt("lecturer_id");
+                String lecturerName = resultSet.getString("name");
+                String lecturerDob = resultSet.getString("date_of_birth");
+                String lecturerGender = resultSet.getString("gender");
+
+                Lecturer lecturer = new Lecturer(lecturerName, java.time.LocalDate.parse(lecturerDob), lecturerGender, lecturerID);
+                Subject subject = new Subject(subjectID, subjectName, lecturer, credits);
+                subjects.add(subject);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return subjects;
     }
 
+    // Lấy môn học theo ID
     public Subject getSubjectById(int subjectID) {
         Subject subject = null;
-        String sql = "SELECT * FROM subjects WHERE subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, subjectID);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    String subjectName = rs.getString("subject_name");
-                    int lecturerID = rs.getInt("lecturer_id");
-                    int credits = rs.getInt("credits"); // Đọc cột credits
-                    Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
-                    subject = new Subject(subjectID, subjectName, lecturer, credits);
-                }
+        String query = """
+            SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, l.name, l.date_of_birth, l.gender
+            FROM subjects s
+            JOIN lecturers l ON s.lecturer_id = l.lecturer_id
+            WHERE s.subject_id = ?
+        """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, subjectID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String subjectName = resultSet.getString("subject_name");
+                int credits = resultSet.getInt("credits");
+
+                // Tạo đối tượng Lecturer với đầy đủ thông tin
+                int lecturerID = resultSet.getInt("lecturer_id");
+                String lecturerName = resultSet.getString("name");
+                String lecturerDob = resultSet.getString("date_of_birth");
+                String lecturerGender = resultSet.getString("gender");
+
+                Lecturer lecturer = new Lecturer(lecturerName, java.time.LocalDate.parse(lecturerDob), lecturerGender, lecturerID);
+                subject = new Subject(subjectID, subjectName, lecturer, credits);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return subject;
     }
 
-    public void saveSubject(Subject subject) {
-        String sql = "INSERT INTO subjects (subject_id, subject_name, lecturer_id, credits) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, subject.getSubjectID());
-            pstmt.setString(2, subject.getSubjectName());
-            pstmt.setInt(3, subject.getLecturer().getLecturerID());
-            pstmt.setInt(4, subject.getCredits()); // Lưu cột credits
-            pstmt.executeUpdate();
+    // Lấy danh sách môn học theo ID sinh viên
+    public List<Subject> getSubjectsByStudentID(int studentID) {
+        List<Subject> subjects = new ArrayList<>();
+        String query = """
+            SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, l.name, l.date_of_birth, l.gender
+            FROM subjects s
+            JOIN enrollments e ON s.subject_id = e.subject_id
+            JOIN lecturers l ON s.lecturer_id = l.lecturer_id
+            WHERE e.student_id = ?
+        """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, studentID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                int subjectID = resultSet.getInt("subject_id");
+                String subjectName = resultSet.getString("subject_name");
+                int credits = resultSet.getInt("credits");
+
+                // Tạo đối tượng Lecturer với đầy đủ thông tin
+                int lecturerID = resultSet.getInt("lecturer_id");
+                String lecturerName = resultSet.getString("name");
+                String lecturerDob = resultSet.getString("date_of_birth");
+                String lecturerGender = resultSet.getString("gender");
+
+                Lecturer lecturer = new Lecturer(lecturerName, java.time.LocalDate.parse(lecturerDob), lecturerGender, lecturerID);
+                Subject subject = new Subject(subjectID, subjectName, lecturer, credits);
+                subjects.add(subject);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        return subjects;
     }
 
-    public void updateSubject(Subject subject) {
-        String sql = "UPDATE subjects SET subject_name = ?, lecturer_id = ?, credits = ? WHERE subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, subject.getSubjectName());
-            pstmt.setInt(2, subject.getLecturer().getLecturerID());
-            pstmt.setInt(3, subject.getCredits()); // Cập nhật cột credits
-            pstmt.setInt(4, subject.getSubjectID());
-            pstmt.executeUpdate();
+    // Xóa môn học
+    public boolean deleteSubject(int subjectID) {
+        String query = "DELETE FROM subjects WHERE subject_id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, subjectID);
+            int affectedRows = preparedStatement.executeUpdate();
+            return affectedRows > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    public void deleteSubject(int subjectID) {
-        String sql = "DELETE FROM subjects WHERE subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, subjectID);
-            pstmt.executeUpdate();
+    // Cập nhật môn học
+    public boolean updateSubject(Subject subject) {
+        String query = """
+            UPDATE subjects
+            SET subject_name = ?, credits = ?, lecturer_id = ?
+            WHERE subject_id = ?
+        """;
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, subject.getSubjectName());
+            preparedStatement.setInt(2, subject.getCredits());
+            preparedStatement.setInt(3, subject.getLecturer().getLecturerID());
+            preparedStatement.setInt(4, subject.getSubjectID());
+
+            int affectedRows = preparedStatement.executeUpdate();
+            return affectedRows > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Lưu môn học mới
+    public boolean saveSubject(Subject subject) {
+        String query = """
+            INSERT INTO subjects (subject_id, subject_name, credits, lecturer_id)
+            VALUES (?, ?, ?, ?)
+        """;
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, subject.getSubjectID());
+            preparedStatement.setString(2, subject.getSubjectName());
+            preparedStatement.setInt(3, subject.getCredits());
+            preparedStatement.setInt(4, subject.getLecturer().getLecturerID());
+
+            int affectedRows = preparedStatement.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

@@ -17,11 +17,9 @@ public class PersonDAO {
                     String name = rs.getString("name");
                     Date dateOfBirth = rs.getDate("date_of_birth");
                     String gender = rs.getString("gender");
-                    // Create Person object based on retrieved data
                     person = new Person(name, dateOfBirth.toLocalDate(), gender) {
                         @Override
                         public void displayInfo() {
-                            // Implement displayInfo
                         }
                     };
                 }

@@ -1,9 +1,7 @@
 package main.java.com.university.ui;
 
-import main.java.com.university.dao.LecturerDAO;
-import main.java.com.university.dao.SubjectDAO;
-import main.java.com.university.model.Lecturer;
-import main.java.com.university.model.Subject;
+import main.java.com.university.dao.*;
+import main.java.com.university.model.*;
 
 import javax.swing.*;
 import java.awt.*;
