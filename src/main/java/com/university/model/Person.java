@@ -2,8 +2,9 @@ package main.java.com.university.model;
 
 import java.time.LocalDate;
 
+import java.time.LocalDate;
+
 public abstract class Person {
-    private int id;
     private String name;
     private LocalDate dateOfBirth;
     private String gender;
@@ -12,18 +13,6 @@ public abstract class Person {
         this.name = name;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
-    }
-
-    // Phương thức trừu tượng để hiển thị thông tin
-    public abstract void displayInfo();
-
-    // Getter và Setter
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -49,4 +38,6 @@ public abstract class Person {
     public void setGender(String gender) {
         this.gender = gender;
     }
+
+    public abstract void displayInfo();
 }

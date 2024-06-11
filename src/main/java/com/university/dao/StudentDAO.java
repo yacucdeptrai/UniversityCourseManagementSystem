@@ -1,60 +1,27 @@
 package main.java.com.university.dao;
 
 import main.java.com.university.model.Student;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StudentDAO {
-    public void saveStudent(Student student) {
-        String query = "INSERT INTO students (student_id, person_id) VALUES (?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, student.getStudentID());
-            stmt.setInt(2, student.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Student getStudentById(int studentID) {
-        String query = "SELECT students.*, persons.* FROM students JOIN persons ON students.person_id = persons.id WHERE student_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, studentID);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new Student(
-                            rs.getString("name"),
-                            rs.getDate("date_of_birth").toLocalDate(),
-                            rs.getString("gender"),
-                            rs.getInt("student_id")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
-        String query = "SELECT students.*, persons.* FROM students JOIN persons ON students.person_id = persons.id";
+        String sql = "SELECT students.student_id, persons.name, persons.date_of_birth, persons.gender " +
+                "FROM students JOIN persons ON students.person_id = persons.id";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                students.add(new Student(
-                        rs.getString("name"),
-                        rs.getDate("date_of_birth").toLocalDate(),
-                        rs.getString("gender"),
-                        rs.getInt("student_id")
-                ));
+                int studentID = rs.getInt("student_id");
+                String name = rs.getString("name");
+                LocalDate dateOfBirth = rs.getDate("date_of_birth").toLocalDate();
+                String gender = rs.getString("gender");
+                students.add(new Student(studentID, name, dateOfBirth, gender));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -62,34 +29,97 @@ public class StudentDAO {
         return students;
     }
 
-    public void updateStudent(Student student) {
-        String query = "UPDATE students SET person_id = ? WHERE student_id = ?";
-        String personQuery = "UPDATE persons SET name = ?, date_of_birth = ?, gender = ? WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            try (PreparedStatement stmt = conn.prepareStatement(personQuery)) {
-                stmt.setString(1, student.getName());
-                stmt.setDate(2, java.sql.Date.valueOf(student.getDateOfBirth()));
-                stmt.setString(3, student.getGender());
-                stmt.setInt(4, student.getId());
-                stmt.executeUpdate();
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, student.getId());
-                stmt.setInt(2, student.getStudentID());
-                stmt.executeUpdate();
+    public void saveStudent(Student student) {
+        String personSql = "INSERT INTO persons (name, date_of_birth, gender) VALUES (?, ?, ?)";
+        String studentSql = "INSERT INTO students (student_id, person_id) VALUES (?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement personStmt = conn.prepareStatement(personSql, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement studentStmt = conn.prepareStatement(studentSql)) {
+            // Insert into persons table
+            personStmt.setString(1, student.getName());
+            personStmt.setDate(2, Date.valueOf(student.getDateOfBirth()));
+            personStmt.setString(3, student.getGender());
+            personStmt.executeUpdate();
+            try (ResultSet generatedKeys = personStmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int personID = generatedKeys.getInt(1);
+                    // Insert into students table
+                    studentStmt.setInt(1, student.getStudentID());
+                    studentStmt.setInt(2, personID);
+                    studentStmt.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void deleteStudent(int studentID) {
-        String query = "DELETE FROM students WHERE student_id = ?";
+    public void updateStudent(Student student) {
+        String personSql = "UPDATE persons SET name = ?, date_of_birth = ?, gender = ? " +
+                "WHERE id = (SELECT person_id FROM students WHERE student_id = ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, studentID);
-            stmt.executeUpdate();
+             PreparedStatement personStmt = conn.prepareStatement(personSql)) {
+            personStmt.setString(1, student.getName());
+            personStmt.setDate(2, Date.valueOf(student.getDateOfBirth()));
+            personStmt.setString(3, student.getGender());
+            personStmt.setInt(4, student.getStudentID());
+            personStmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteStudent(int studentID) {
+        String sql = "DELETE FROM students WHERE student_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, studentID);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Student getStudentById(int studentID) {
+        Student student = null;
+        String sql = "SELECT students.student_id, persons.name, persons.date_of_birth, persons.gender " +
+                "FROM students JOIN persons ON students.person_id = persons.id WHERE students.student_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, studentID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String name = rs.getString("name");
+                    LocalDate dateOfBirth = rs.getDate("date_of_birth").toLocalDate();
+                    String gender = rs.getString("gender");
+                    student = new Student(studentID, name, dateOfBirth, gender);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return student;
+    }
+
+    public void enrollStudentInSubject(int studentID, int subjectID) {
+        String sql = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, studentID);
+            pstmt.setInt(2, subjectID);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeStudentFromSubject(int studentID, int subjectID) {
+        String sql = "DELETE FROM enrollments WHERE student_id = ? AND subject_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, studentID);
+            pstmt.setInt(2, subjectID);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

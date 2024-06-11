@@ -3,59 +3,24 @@ package main.java.com.university.dao;
 import main.java.com.university.model.Lecturer;
 import main.java.com.university.model.Subject;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SubjectDAO {
-    public void saveSubject(Subject subject) {
-        String query = "INSERT INTO subjects (subject_id, subject_name, lecturer_id) VALUES (?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, subject.getSubjectID());
-            stmt.setString(2, subject.getSubjectName());
-            stmt.setInt(3, subject.getLecturer().getLecturerID());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Subject getSubjectById(int subjectID) {
-        String query = "SELECT * FROM subjects WHERE subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, subjectID);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new Subject(
-                            rs.getInt("subject_id"),
-                            rs.getString("subject_name"),
-                            new LecturerDAO().getLecturerById(rs.getInt("lecturer_id"))
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public List<Subject> getAllSubjects() {
         List<Subject> subjects = new ArrayList<>();
-        String query = "SELECT * FROM subjects";
+        String sql = "SELECT * FROM subjects";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                subjects.add(new Subject(
-                        rs.getInt("subject_id"),
-                        rs.getString("subject_name"),
-                        new LecturerDAO().getLecturerById(rs.getInt("lecturer_id"))
-                ));
+                int subjectID = rs.getInt("subject_id");
+                String subjectName = rs.getString("subject_name");
+                int lecturerID = rs.getInt("lecturer_id");
+                Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
+                subjects.add(new Subject(subjectID, subjectName, lecturer));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -63,48 +28,58 @@ public class SubjectDAO {
         return subjects;
     }
 
-    // Các phương thức mới để quản lý đăng ký môn học
-
-    public List<Subject> getSubjectsByStudentID(int studentID) {
-        List<Subject> subjects = new ArrayList<>();
-        String query = "SELECT s.* FROM subjects s JOIN enrollments e ON s.subject_id = e.subject_id WHERE e.student_id = ?";
+    public Subject getSubjectById(int subjectID) {
+        Subject subject = null;
+        String sql = "SELECT * FROM subjects WHERE subject_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, studentID);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    subjects.add(new Subject(
-                            rs.getInt("subject_id"),
-                            rs.getString("subject_name"),
-                            new LecturerDAO().getLecturerById(rs.getInt("lecturer_id"))
-                    ));
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, subjectID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String subjectName = rs.getString("subject_name");
+                    int lecturerID = rs.getInt("lecturer_id");
+                    Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
+                    subject = new Subject(subjectID, subjectName, lecturer);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return subjects;
+        return subject;
     }
 
-    public void enrollStudentInSubject(int studentID, int subjectID) {
-        String query = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
+    public void saveSubject(Subject subject) {
+        String sql = "INSERT INTO subjects (subject_id, subject_name, lecturer_id) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, studentID);
-            stmt.setInt(2, subjectID);
-            stmt.executeUpdate();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, subject.getSubjectID());
+            pstmt.setString(2, subject.getSubjectName());
+            pstmt.setInt(3, subject.getLecturer().getLecturerID());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void removeStudentFromSubject(int studentID, int subjectID) {
-        String query = "DELETE FROM enrollments WHERE student_id = ? AND subject_id = ?";
+    public void updateSubject(Subject subject) {
+        String sql = "UPDATE subjects SET subject_name = ?, lecturer_id = ? WHERE subject_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, studentID);
-            stmt.setInt(2, subjectID);
-            stmt.executeUpdate();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, subject.getSubjectName());
+            pstmt.setInt(2, subject.getLecturer().getLecturerID());
+            pstmt.setInt(3, subject.getSubjectID());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteSubject(int subjectID) {
+        String sql = "DELETE FROM subjects WHERE subject_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, subjectID);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
