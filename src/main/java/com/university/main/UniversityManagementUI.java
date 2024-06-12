@@ -166,7 +166,6 @@ public class UniversityManagementUI extends JFrame {
             info.append("<b>Date of Birth:</b> ").append(student.getDateOfBirth()).append("<br/>");
             info.append("<b>Gender:</b> ").append(student.getGender()).append("<br/>");
             info.append("<b>Enrolled Subjects:</b> ").append("<br/>");
-
             List<Subject> subjects = new SubjectDAO().getSubjectsByStudentID(studentID);
             for (Subject subject : subjects) {
                 info.append(subject.getSubjectName()).append(" (").append(subject.getCredits()).append(" credits)").append("<br/>");
@@ -177,6 +176,7 @@ public class UniversityManagementUI extends JFrame {
             lblStudentInfo.setText("<html><br/><br/><br/>Select a student to see details.</html>");
         }
     }
+
 
 
     private JPanel createLecturerManagementPanel() {
@@ -337,30 +337,47 @@ public class UniversityManagementUI extends JFrame {
         }
     }
 
-    // Trong UniversityManagementUI.java:
     private void assignCourseToStudent() {
-        int selectedStudentRow = studentTable.getSelectedRow();
-        if (selectedStudentRow != -1) {
-            int studentID = (int) studentTableModel.getValueAt(selectedStudentRow, 0);
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow != -1) {
+            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
+            int modelRow = studentTable.convertRowIndexToModel(selectedRow);
+            int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
+
+            // Lấy danh sách các môn học
+            List<Subject> allSubjects = new SubjectDAO().getAllSubjects();
+            if (allSubjects.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No subjects available for enrollment.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Chuyển danh sách môn học thành mảng String để hiển thị trong hộp thoại
+            String[] subjectNames = allSubjects.stream()
+                    .map(subject -> subject.getSubjectName() + " (" + subject.getCredits() + " credits)")
+                    .toArray(String[]::new);
+            Subject[] subjectsArray = allSubjects.toArray(new Subject[0]);
+
+            // Hiển thị hộp thoại chọn môn học
             Subject selectedSubject = (Subject) JOptionPane.showInputDialog(
                     this,
-                    "Select a Subject to Enroll:",
+                    "Select Subject to Enroll:",
                     "Enroll Subject",
-                    JOptionPane.QUESTION_MESSAGE,
+                    JOptionPane.PLAIN_MESSAGE,
                     null,
-                    new SubjectDAO().getAllSubjects().toArray(),
-                    null
+                    subjectsArray,
+                    subjectsArray[0]
             );
 
             if (selectedSubject != null) {
+                // Đăng ký môn học cho sinh viên
                 new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getSubjectID());
-                JOptionPane.showMessageDialog(this, "Subject assigned successfully!");
-                updateStudentInfoPanel();
+                JOptionPane.showMessageDialog(this, "Subject enrolled successfully!");
+                updateStudentInfoPanel(studentID); // Cập nhật thông tin sinh viên
             } else {
                 JOptionPane.showMessageDialog(this, "No subject selected.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a student first.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select a student to assign a course.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

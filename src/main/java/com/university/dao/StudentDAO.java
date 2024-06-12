@@ -10,17 +10,20 @@ import java.util.List;
 public class StudentDAO {
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
-        String sql = "SELECT students.student_id, persons.name, persons.date_of_birth, persons.gender " +
-                "FROM students JOIN persons ON students.person_id = persons.id";
+        String sql = "SELECT s.student_id, p.name, p.date_of_birth, p.gender " +
+                "FROM students s " +
+                "JOIN persons p ON s.person_id = p.id";
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 int studentID = rs.getInt("student_id");
                 String name = rs.getString("name");
-                LocalDate dateOfBirth = rs.getDate("date_of_birth").toLocalDate();
+                Date dob = rs.getDate("date_of_birth");
                 String gender = rs.getString("gender");
-                students.add(new Student(studentID, name, dateOfBirth, gender));
+
+                Student student = new Student(studentID, name, dob.toLocalDate(), gender);
+                students.add(student);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -81,18 +84,20 @@ public class StudentDAO {
 
     public Student getStudentById(int studentID) {
         Student student = null;
-        String sql = "SELECT students.student_id, persons.name, persons.date_of_birth, persons.gender " +
-                "FROM students JOIN persons ON students.person_id = persons.id WHERE students.student_id = ?";
+        String sql = "SELECT s.student_id, p.name, p.date_of_birth, p.gender " +
+                "FROM students s " +
+                "JOIN persons p ON s.person_id = p.id " +
+                "WHERE s.student_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, studentID);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    String name = rs.getString("name");
-                    LocalDate dateOfBirth = rs.getDate("date_of_birth").toLocalDate();
-                    String gender = rs.getString("gender");
-                    student = new Student(studentID, name, dateOfBirth, gender);
-                }
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, studentID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String name = rs.getString("name");
+                Date dob = rs.getDate("date_of_birth");
+                String gender = rs.getString("gender");
+
+                student = new Student(studentID, name, dob.toLocalDate(), gender);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -101,9 +106,9 @@ public class StudentDAO {
     }
 
     public void assignCourseToStudent(int studentID, int subjectID) {
-        String query = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
+        String sql = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, studentID);
             stmt.setInt(2, subjectID);
             stmt.executeUpdate();

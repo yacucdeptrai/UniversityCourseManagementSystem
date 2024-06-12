@@ -10,22 +10,23 @@ import java.util.List;
 public class SubjectDAO {
     public List<Subject> getAllSubjects() {
         List<Subject> subjects = new ArrayList<>();
-        String sql = "SELECT s.subject_id, s.subject_name, l.lecturer_id, p.name AS lecturer_name, s.credits " +
+        String sql = "SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, p.name AS lecturer_name " +
                 "FROM subjects s " +
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id";
-
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 int subjectID = rs.getInt("subject_id");
                 String subjectName = rs.getString("subject_name");
+                int credits = rs.getInt("credits");
                 int lecturerID = rs.getInt("lecturer_id");
                 String lecturerName = rs.getString("lecturer_name");
-                int credits = rs.getInt("credits");
+
                 Lecturer lecturer = new Lecturer(lecturerName, null, null, lecturerID);
-                subjects.add(new Subject(subjectID, subjectName, lecturer, credits));
+                Subject subject = new Subject(subjectID, subjectName, lecturer, credits);
+                subjects.add(subject);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -33,29 +34,26 @@ public class SubjectDAO {
         return subjects;
     }
 
-
     // Lấy môn học theo ID sinh viên
     public List<Subject> getSubjectsByStudentID(int studentID) {
         List<Subject> subjects = new ArrayList<>();
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            String sql = "SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, l.name AS lecturer_name, l.date_of_birth AS lecturer_dob, l.gender AS lecturer_gender " +
-                    "FROM subjects s " +
-                    "JOIN enrollments e ON s.subject_id = e.subject_id " +
-                    "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
-                    "WHERE e.student_id = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, studentID);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                int subjectID = resultSet.getInt("subject_id");
-                String subjectName = resultSet.getString("subject_name");
-                int credits = resultSet.getInt("credits");
-                int lecturerID = resultSet.getInt("lecturer_id");
-                String lecturerName = resultSet.getString("lecturer_name");
-                String lecturerDob = resultSet.getString("lecturer_dob");
-                String lecturerGender = resultSet.getString("lecturer_gender");
-
-                Lecturer lecturer = new Lecturer(lecturerName, java.time.LocalDate.parse(lecturerDob), lecturerGender, lecturerID);
+        String sql = "SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, p.name AS lecturer_name " +
+                "FROM enrollments e " +
+                "JOIN subjects s ON e.subject_id = s.subject_id " +
+                "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
+                "JOIN persons p ON l.person_id = p.id " +
+                "WHERE e.student_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, studentID);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int subjectID = rs.getInt("subject_id");
+                String subjectName = rs.getString("subject_name");
+                int credits = rs.getInt("credits");
+                int lecturerID = rs.getInt("lecturer_id");
+                String lecturerName = rs.getString("lecturer_name");
+                Lecturer lecturer = new Lecturer(lecturerName, null, null, lecturerID);
                 Subject subject = new Subject(subjectID, subjectName, lecturer, credits);
                 subjects.add(subject);
             }
@@ -73,10 +71,8 @@ public class SubjectDAO {
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id " +
                 "WHERE s.subject_id = ?";
-
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, subjectID);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -84,7 +80,6 @@ public class SubjectDAO {
                     int credits = rs.getInt("credits");
                     int lecturerID = rs.getInt("lecturer_id");
                     String lecturerName = rs.getString("name");
-
                     Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
                     subject = new Subject(subjectID, subjectName, lecturer, credits);
                 }
@@ -99,7 +94,6 @@ public class SubjectDAO {
         String sql = "UPDATE subjects SET subject_name = ?, credits = ?, lecturer_id = ? WHERE subject_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setString(1, subject.getSubjectName());
             stmt.setInt(2, subject.getCredits());
             stmt.setInt(3, subject.getLecturer().getLecturerID());
@@ -114,7 +108,6 @@ public class SubjectDAO {
     public void saveSubject(Subject subject) {
         String checkSql = "SELECT COUNT(*) FROM subjects WHERE subject_id = ?";
         boolean exists = false;
-
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
 
@@ -124,7 +117,6 @@ public class SubjectDAO {
                     exists = rs.getInt(1) > 0;
                 }
             }
-
             if (exists) {
                 // Cập nhật môn học nếu đã tồn tại
                 String updateSql = "UPDATE subjects SET subject_name = ?, credits = ?, lecturer_id = ? WHERE subject_id = ?";
@@ -156,7 +148,6 @@ public class SubjectDAO {
         String sql = "DELETE FROM subjects WHERE subject_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, subjectID);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -174,20 +165,17 @@ public class SubjectDAO {
             ResultSet rs = checkStatement.executeQuery();
             rs.next();
             int count = rs.getInt(1);
-
             if (count > 0) {
                 // Nếu sinh viên đã đăng ký khóa học này, hiển thị thông báo và không thêm mới
                 System.out.println("Student has already enrolled in this course.");
                 return;
             }
-
             // Nếu chưa đăng ký, thêm mới vào bảng enrollments
             String sql = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, studentID);
             statement.setInt(2, subjectID);
             statement.executeUpdate();
-
             System.out.println("Course assigned successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
