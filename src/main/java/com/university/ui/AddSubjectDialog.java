@@ -1,7 +1,9 @@
 package main.java.com.university.ui;
 
-import main.java.com.university.dao.*;
-import main.java.com.university.model.*;
+import main.java.com.university.dao.LecturerDAO;
+import main.java.com.university.dao.SubjectDAO;
+import main.java.com.university.model.Lecturer;
+import main.java.com.university.model.Subject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,36 +13,27 @@ import java.util.List;
 
 public class AddSubjectDialog extends JDialog {
     private JTextField subjectNameField;
-    private JTextField subjectIdField;
     private JComboBox<Lecturer> lecturerComboBox;
     private JTextField creditsField;
     private JButton btnAddSubject;
 
     public AddSubjectDialog(Frame parent) {
         super(parent, "Add Subject", true);
-        setLayout(new GridLayout(5, 2, 10, 10));
-        setSize(400, 300);
+        setLayout(new GridLayout(5, 2, 5, 5));
+        setSize(350, 180);
         setLocationRelativeTo(parent);
 
-        JLabel lblSubjectName = new JLabel("Subject Name:");
+        add(new JLabel("Subject Name:"));
         subjectNameField = new JTextField();
-        add(lblSubjectName);
         add(subjectNameField);
 
-        JLabel lblSubjectId = new JLabel("Subject ID:");
-        subjectIdField = new JTextField();
-        add(lblSubjectId);
-        add(subjectIdField);
-
-        JLabel lblLecturer = new JLabel("Select Lecturer:");
+        add(new JLabel("Lecturer:"));
         lecturerComboBox = new JComboBox<>();
-        loadLecturers();
-        add(lblLecturer);
+        loadLecturers();  // Nạp giảng viên vào combo box
         add(lecturerComboBox);
 
-        JLabel lblCredits = new JLabel("Credits:");
+        add(new JLabel("Credits:"));
         creditsField = new JTextField();
-        add(lblCredits);
         add(creditsField);
 
         btnAddSubject = new JButton("Add Subject");
@@ -50,27 +43,30 @@ public class AddSubjectDialog extends JDialog {
                 addSubject();
             }
         });
-        add(new JLabel());
+        add(new JLabel());  // Chừa khoảng trống
         add(btnAddSubject);
     }
 
     private void loadLecturers() {
-        List<Lecturer> lecturers = new LecturerDAO().getAllLecturers();
+        LecturerDAO lecturerDAO = new LecturerDAO();
+        List<Lecturer> lecturers = lecturerDAO.getAllLecturers();
         for (Lecturer lecturer : lecturers) {
-            lecturerComboBox.addItem(lecturer);
+            lecturerComboBox.addItem(lecturer);  // Sử dụng toString để hiển thị
         }
     }
 
     private void addSubject() {
         String subjectName = subjectNameField.getText();
-        int subjectId = Integer.parseInt(subjectIdField.getText());
-        Lecturer lecturer = (Lecturer) lecturerComboBox.getSelectedItem();
+        Lecturer selectedLecturer = (Lecturer) lecturerComboBox.getSelectedItem();
         int credits = Integer.parseInt(creditsField.getText());
 
-        Subject subject = new Subject(subjectId, subjectName, lecturer, credits);
-        new SubjectDAO().saveSubject(subject);
-
-        JOptionPane.showMessageDialog(this, "Subject added successfully!");
-        dispose();
+        if (selectedLecturer != null) {
+            Subject subject = new Subject(0, subjectName, selectedLecturer, credits);
+            new SubjectDAO().saveSubject(subject);
+            JOptionPane.showMessageDialog(this, "Subject added successfully!");
+            dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a lecturer.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

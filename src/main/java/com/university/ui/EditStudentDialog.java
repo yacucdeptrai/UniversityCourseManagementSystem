@@ -29,7 +29,7 @@ public class EditStudentDialog extends JDialog {
         super(parent, "Edit Student", true);
         this.student = student;
         setLayout(new GridBagLayout());
-        setSize(400, 400);
+        setSize(300, 350);
         setLocationRelativeTo(parent);
 
         GridBagConstraints gbc = new GridBagConstraints();
