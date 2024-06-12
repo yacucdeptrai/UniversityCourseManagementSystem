@@ -338,36 +338,56 @@ public class UniversityManagementUI extends JFrame {
     private void assignCourseToStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow != -1) {
+            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
             int modelRow = studentTable.convertRowIndexToModel(selectedRow);
             int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
 
+            // Lấy danh sách các môn học
             List<Subject> allSubjects = new SubjectDAO().getAllSubjects();
             if (allSubjects.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No subjects available for enrollment.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            String[] subjectNames = allSubjects.stream()
-                    .map(subject -> subject.getSubjectName() + " (" + subject.getCredits() + " credits)")
-                    .toArray(String[]::new);
+            // Chuyển danh sách môn học thành mảng
             Subject[] subjectsArray = allSubjects.toArray(new Subject[0]);
 
-            Subject selectedSubject = (Subject) JOptionPane.showInputDialog(
+            // Hiển thị hộp thoại chọn môn học
+            JComboBox<Subject> subjectComboBox = new JComboBox<>(subjectsArray);
+            subjectComboBox.setRenderer(new ListCellRenderer<Subject>() {
+                @Override
+                public Component getListCellRendererComponent(JList<? extends Subject> list, Subject value, int index, boolean isSelected, boolean cellHasFocus) {
+                    JLabel label = new JLabel(value.toString());
+                    if (isSelected) {
+                        label.setBackground(list.getSelectionBackground());
+                        label.setForeground(list.getSelectionForeground());
+                    } else {
+                        label.setBackground(list.getBackground());
+                        label.setForeground(list.getForeground());
+                    }
+                    label.setOpaque(true);
+                    return label;
+                }
+            });
+
+            int result = JOptionPane.showConfirmDialog(
                     this,
-                    "Select Subject to Enroll:",
-                    "Enroll Subject",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    subjectsArray,
-                    subjectsArray[0]
+                    subjectComboBox,
+                    "Select Subject to Enroll",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE
             );
 
-            if (selectedSubject != null) {
-                new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getSubjectID());
-                JOptionPane.showMessageDialog(this, "Subject enrolled successfully!");
-                updateStudentInfoPanel(studentID); // Cập nhật thông tin sinh viên
-            } else {
-                JOptionPane.showMessageDialog(this, "No subject selected.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (result == JOptionPane.OK_OPTION) {
+                Subject selectedSubject = (Subject) subjectComboBox.getSelectedItem();
+                if (selectedSubject != null) {
+                    // Đăng ký môn học cho sinh viên
+                    new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getSubjectID());
+                    JOptionPane.showMessageDialog(this, "Subject enrolled successfully!");
+                    updateStudentInfoPanel(studentID); // Cập nhật thông tin sinh viên
+                } else {
+                    JOptionPane.showMessageDialog(this, "No subject selected.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please select a student to assign a course.", "Error", JOptionPane.ERROR_MESSAGE);

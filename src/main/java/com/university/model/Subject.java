@@ -48,11 +48,6 @@ public class Subject {
 
     @Override
     public String toString() {
-        return "Subject{" +
-                "subjectID=" + subjectID +
-                ", subjectName='" + subjectName + '\'' +
-                ", lecturer=" + lecturer +
-                ", credits=" + credits +
-                '}';
+        return String.format("%d - %s - %s", subjectID, subjectName, lecturer.getName());
     }
 }
