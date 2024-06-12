@@ -47,15 +47,15 @@ CREATE TABLE IF NOT EXISTS enrollments (
 SHOW TABLES LIKE 'persons';
 SHOW TABLES LIKE 'lecturers';
 
-INSERT INTO person (name, date_of_birth, gender) VALUES
+INSERT INTO persons (name, date_of_birth, gender) VALUES
 ('Nguyễn Hoàng Anh', '1980-04-20', 'Male'),
 ('Lê Thị Bích', '1985-06-15', 'Female');
 
-INSERT INTO lecturer (person_id) VALUES
+INSERT INTO lecturers (person_id) VALUES
 (1),
 (2);
 
-INSERT INTO subject (name, credits, lecturer_id) VALUES
+INSERT INTO subjects (name, credits, lecturer_id) VALUES
 ('Lập Trình Java', 3, 1),
 ('Lập Trình C#', 3, 2);
 
