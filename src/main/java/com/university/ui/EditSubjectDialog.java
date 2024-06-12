@@ -1,7 +1,9 @@
 package main.java.com.university.ui;
 
-import main.java.com.university.dao.*;
-import main.java.com.university.model.*;
+import main.java.com.university.dao.LecturerDAO;
+import main.java.com.university.dao.SubjectDAO;
+import main.java.com.university.model.Lecturer;
+import main.java.com.university.model.Subject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,25 +22,21 @@ public class EditSubjectDialog extends JDialog {
     public EditSubjectDialog(Frame parent, Subject subject) {
         super(parent, "Edit Subject", true);
         this.subject = subject;
-        setLayout(new GridLayout(5, 2, 10, 10));
-        setSize(400, 300);
+        setLayout(new GridLayout(5, 2, 5, 5));
+        setSize(350, 180);
         setLocationRelativeTo(parent);
 
-        JLabel lblSubjectName = new JLabel("Subject Name:");
+        add(new JLabel("Subject Name:"));
         subjectNameField = new JTextField(subject.getSubjectName());
-        add(lblSubjectName);
         add(subjectNameField);
 
-        JLabel lblLecturer = new JLabel("Select Lecturer:");
+        add(new JLabel("Lecturer:"));
         lecturerComboBox = new JComboBox<>();
-        loadLecturers();
-        lecturerComboBox.setSelectedItem(subject.getLecturer());
-        add(lblLecturer);
+        loadLecturers(subject.getLecturer());  // Nạp giảng viên vào combo box
         add(lecturerComboBox);
 
-        JLabel lblCredits = new JLabel("Credits:");
+        add(new JLabel("Credits:"));
         creditsField = new JTextField(String.valueOf(subject.getCredits()));
-        add(lblCredits);
         add(creditsField);
 
         btnEditSubject = new JButton("Edit Subject");
@@ -48,28 +46,33 @@ public class EditSubjectDialog extends JDialog {
                 editSubject();
             }
         });
-        add(new JLabel());
+        add(new JLabel());  // Chừa khoảng trống
         add(btnEditSubject);
     }
 
-    private void loadLecturers() {
-        List<Lecturer> lecturers = new LecturerDAO().getAllLecturers();
+    private void loadLecturers(Lecturer selectedLecturer) {
+        LecturerDAO lecturerDAO = new LecturerDAO();
+        List<Lecturer> lecturers = lecturerDAO.getAllLecturers();
         for (Lecturer lecturer : lecturers) {
-            lecturerComboBox.addItem(lecturer);
+            lecturerComboBox.addItem(lecturer);  // Sử dụng toString để hiển thị
         }
+        lecturerComboBox.setSelectedItem(selectedLecturer);  // Đặt giảng viên được chọn
     }
 
     private void editSubject() {
         String subjectName = subjectNameField.getText();
-        Lecturer lecturer = (Lecturer) lecturerComboBox.getSelectedItem();
+        Lecturer selectedLecturer = (Lecturer) lecturerComboBox.getSelectedItem();
         int credits = Integer.parseInt(creditsField.getText());
 
-        subject.setSubjectName(subjectName);
-        subject.setLecturer(lecturer);
-        subject.setCredits(credits);
-        new SubjectDAO().updateSubject(subject);
-
-        JOptionPane.showMessageDialog(this, "Subject updated successfully!");
-        dispose();
+        if (selectedLecturer != null) {
+            subject.setSubjectName(subjectName);
+            subject.setLecturer(selectedLecturer);
+            subject.setCredits(credits);
+            new SubjectDAO().updateSubject(subject);
+            JOptionPane.showMessageDialog(this, "Subject updated successfully!");
+            dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a lecturer.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
