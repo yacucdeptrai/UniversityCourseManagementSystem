@@ -112,8 +112,8 @@ public class LecturerDAO {
     }
 
     public void updateLecturer(Lecturer lecturer) {
-        String sql = "UPDATE persons SET name = ?, date_of_birth = ?, gender = ? WHERE id = ?";
-
+        String sql = "UPDATE persons SET name = ?, date_of_birth = ?, gender = ? " +
+                "WHERE id = (SELECT person_id FROM lecturers WHERE lecturer_id = ?)";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, lecturer.getName());
@@ -127,8 +127,7 @@ public class LecturerDAO {
     }
 
     public void deleteLecturer(int lecturerID) {
-        String sql = "DELETE FROM persons WHERE id = ?";
-
+        String sql = "DELETE FROM lecturers WHERE lecturer_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, lecturerID);
