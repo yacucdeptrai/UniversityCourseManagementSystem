@@ -4,58 +4,102 @@ import main.java.com.university.model.Lecturer;
 import main.java.com.university.model.Subject;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SubjectDAO {
     public List<Subject> getAllSubjects() {
         List<Subject> subjects = new ArrayList<>();
-        String sql = "SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, p.name AS lecturer_name " +
+        String sql = "SELECT s.subject_id, s.subject_name, s.credits, " +
+                "l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
                 "FROM subjects s " +
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id";
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                int subjectID = rs.getInt("subject_id");
-                String subjectName = rs.getString("subject_name");
-                int credits = rs.getInt("credits");
-                int lecturerID = rs.getInt("lecturer_id");
-                String lecturerName = rs.getString("lecturer_name");
 
-                Lecturer lecturer = new Lecturer(lecturerName, null, null, lecturerID);
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                int subjectID = resultSet.getInt("subject_id");
+                String subjectName = resultSet.getString("subject_name");
+                int credits = resultSet.getInt("credits");
+
+                int lecturerID = resultSet.getInt("lecturer_id");
+                String lecturerName = resultSet.getString("lecturer_name");
+                LocalDate lecturerDOB = resultSet.getDate("date_of_birth").toLocalDate();
+                String lecturerGender = resultSet.getString("gender");
+
+                Lecturer lecturer = new Lecturer(lecturerName, lecturerDOB, lecturerGender, lecturerID);
                 Subject subject = new Subject(subjectID, subjectName, lecturer, credits);
                 subjects.add(subject);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return subjects;
+    }
+
+    public Subject getSubjectByName(String subjectName) {
+        String sql = "SELECT s.subject_id, s.subject_name, s.credits, " +
+                "l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
+                "FROM subjects s " +
+                "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
+                "JOIN persons p ON l.person_id = p.id " +
+                "WHERE s.subject_name = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, subjectName);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    int subjectID = resultSet.getInt("subject_id");
+                    int credits = resultSet.getInt("credits");
+
+                    int lecturerID = resultSet.getInt("lecturer_id");
+                    String lecturerName = resultSet.getString("lecturer_name");
+                    LocalDate lecturerDOB = resultSet.getDate("date_of_birth").toLocalDate();
+                    String lecturerGender = resultSet.getString("gender");
+
+                    Lecturer lecturer = new Lecturer(lecturerName, lecturerDOB, lecturerGender, lecturerID);
+                    return new Subject(subjectID, subjectName, lecturer, credits);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     // Lấy môn học theo ID sinh viên
     public List<Subject> getSubjectsByStudentID(int studentID) {
         List<Subject> subjects = new ArrayList<>();
-        String sql = "SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, p.name AS lecturer_name " +
-                "FROM enrollments e " +
-                "JOIN subjects s ON e.subject_id = s.subject_id " +
+        String sql = "SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, p.name " +
+                "FROM subjects s " +
+                "JOIN enrollments e ON s.subject_id = e.subject_id " +
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id " +
                 "WHERE e.student_id = ?";
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, studentID);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                int subjectID = rs.getInt("subject_id");
-                String subjectName = rs.getString("subject_name");
-                int credits = rs.getInt("credits");
-                int lecturerID = rs.getInt("lecturer_id");
-                String lecturerName = rs.getString("lecturer_name");
-                Lecturer lecturer = new Lecturer(lecturerName, null, null, lecturerID);
-                Subject subject = new Subject(subjectID, subjectName, lecturer, credits);
-                subjects.add(subject);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int subjectID = rs.getInt("subject_id");
+                    String subjectName = rs.getString("subject_name");
+                    int credits = rs.getInt("credits");
+                    int lecturerID = rs.getInt("lecturer_id");
+                    String lecturerName = rs.getString("name");
+
+                    Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
+                    Subject subject = new Subject(subjectID, subjectName, lecturer, credits);
+                    subjects.add(subject);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -65,42 +109,70 @@ public class SubjectDAO {
 
     // Lấy môn học theo ID
     public Subject getSubjectById(int subjectID) {
-        Subject subject = null;
-        String sql = "SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, p.name " +
+        String sql = "SELECT s.subject_id, s.subject_name, s.credits, " +
+                "l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
                 "FROM subjects s " +
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id " +
                 "WHERE s.subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, subjectID);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String subjectName = rs.getString("subject_name");
-                    int credits = rs.getInt("credits");
-                    int lecturerID = rs.getInt("lecturer_id");
-                    String lecturerName = rs.getString("name");
-                    Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
-                    subject = new Subject(subjectID, subjectName, lecturer, credits);
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, subjectID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String subjectName = resultSet.getString("subject_name");
+                    int credits = resultSet.getInt("credits");
+
+                    int lecturerID = resultSet.getInt("lecturer_id");
+                    String lecturerName = resultSet.getString("lecturer_name");
+                    LocalDate lecturerDOB = resultSet.getDate("date_of_birth").toLocalDate();
+                    String lecturerGender = resultSet.getString("gender");
+
+                    Lecturer lecturer = new Lecturer(lecturerName, lecturerDOB, lecturerGender, lecturerID);
+                    return new Subject(subjectID, subjectName, lecturer, credits);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return subject;
+        return null;
     }
 
-    public void updateSubject(Subject subject) {
-        String sql = "UPDATE subjects SET subject_name = ?, credits = ?, lecturer_id = ? WHERE subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, subject.getSubjectName());
-            stmt.setInt(2, subject.getCredits());
-            stmt.setInt(3, subject.getLecturer().getLecturerID());
-            stmt.setInt(4, subject.getSubjectID());
-            stmt.executeUpdate();
+
+    public boolean addSubject(Subject subject) {
+        String sql = "INSERT INTO subjects (subject_name, credits, lecturer_id) VALUES (?, ?, ?)";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, subject.getSubjectName());
+            statement.setInt(2, subject.getCredits());
+            statement.setInt(3, subject.getLecturer().getLecturerID());
+
+            return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateSubject(Subject subject) {
+        String sql = "UPDATE subjects SET subject_name = ?, credits = ?, lecturer_id = ? WHERE subject_id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, subject.getSubjectName());
+            statement.setInt(2, subject.getCredits());
+            statement.setInt(3, subject.getLecturer().getLecturerID());
+            statement.setInt(4, subject.getSubjectID());
+
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -144,14 +216,17 @@ public class SubjectDAO {
     }
 
     // Xóa môn học
-    public void deleteSubject(int subjectID) {
+    public boolean deleteSubject(int subjectID) {
         String sql = "DELETE FROM subjects WHERE subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, subjectID);
-            stmt.executeUpdate();
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, subjectID);
+            return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 

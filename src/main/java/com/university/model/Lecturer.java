@@ -10,17 +10,6 @@ public class Lecturer extends Person {
         this.lecturerID = lecturerID;
     }
 
-    @Override
-    public void displayInfo() {
-        System.out.println("Lecturer Name: " + getName());
-        System.out.println("Lecturer ID: " + getLecturerID());
-    }
-
-    @Override
-    public String toString() {
-        return getName() + " (ID: " + lecturerID + ")";
-    }
-
     // Getters và Setters
     public int getLecturerID() {
         return lecturerID;
@@ -28,5 +17,13 @@ public class Lecturer extends Person {
 
     public void setLecturerID(int lecturerID) {
         this.lecturerID = lecturerID;
+    }
+
+    @Override
+    public void displayInfo() {
+        System.out.println("Lecturer ID: " + lecturerID);
+        System.out.println("Name: " + getName());
+        System.out.println("Date of Birth: " + getDateOfBirth());
+        System.out.println("Gender: " + getGender());
     }
 }

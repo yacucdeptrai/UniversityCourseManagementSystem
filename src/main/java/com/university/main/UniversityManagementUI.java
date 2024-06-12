@@ -159,22 +159,20 @@ public class UniversityManagementUI extends JFrame {
     // Phiên bản nhận studentID
     private void updateStudentInfoPanel(int studentID) {
         Student student = new StudentDAO().getStudentById(studentID);
-        if (student != null) {
-            StringBuilder info = new StringBuilder("<html>");
-            info.append("<b>ID:</b> ").append(student.getStudentID()).append("<br/>");
-            info.append("<b>Name:</b> ").append(student.getName()).append("<br/>");
-            info.append("<b>Date of Birth:</b> ").append(student.getDateOfBirth()).append("<br/>");
-            info.append("<b>Gender:</b> ").append(student.getGender()).append("<br/>");
-            info.append("<b>Enrolled Subjects:</b> ").append("<br/>");
-            List<Subject> subjects = new SubjectDAO().getSubjectsByStudentID(studentID);
-            for (Subject subject : subjects) {
-                info.append(subject.getSubjectName()).append(" (").append(subject.getCredits()).append(" credits)").append("<br/>");
-            }
-            info.append("</html>");
-            lblStudentInfo.setText(info.toString());
-        } else {
-            lblStudentInfo.setText("<html><br/><br/><br/>Select a student to see details.</html>");
+
+        StringBuilder info = new StringBuilder("<html>");
+        info.append("<b>ID:</b> ").append(student.getStudentID()).append("<br/>");
+        info.append("<b>Name:</b> ").append(student.getName()).append("<br/>");
+        info.append("<b>Date of Birth:</b> ").append(student.getDateOfBirth()).append("<br/>");
+        info.append("<b>Gender:</b> ").append(student.getGender()).append("<br/>");
+        info.append("<b>Enrolled Subjects:</b> ").append("<br/>");
+
+        List<Subject> subjects = new SubjectDAO().getSubjectsByStudentID(studentID);
+        for (Subject subject : subjects) {
+            info.append(subject.getSubjectName()).append(" (").append(subject.getCredits()).append(" credits)").append("<br/>");
         }
+        info.append("</html>");
+        lblStudentInfo.setText(info.toString());
     }
 
 
@@ -340,24 +338,20 @@ public class UniversityManagementUI extends JFrame {
     private void assignCourseToStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow != -1) {
-            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
             int modelRow = studentTable.convertRowIndexToModel(selectedRow);
             int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
 
-            // Lấy danh sách các môn học
             List<Subject> allSubjects = new SubjectDAO().getAllSubjects();
             if (allSubjects.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No subjects available for enrollment.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Chuyển danh sách môn học thành mảng String để hiển thị trong hộp thoại
             String[] subjectNames = allSubjects.stream()
                     .map(subject -> subject.getSubjectName() + " (" + subject.getCredits() + " credits)")
                     .toArray(String[]::new);
             Subject[] subjectsArray = allSubjects.toArray(new Subject[0]);
 
-            // Hiển thị hộp thoại chọn môn học
             Subject selectedSubject = (Subject) JOptionPane.showInputDialog(
                     this,
                     "Select Subject to Enroll:",
@@ -369,7 +363,6 @@ public class UniversityManagementUI extends JFrame {
             );
 
             if (selectedSubject != null) {
-                // Đăng ký môn học cho sinh viên
                 new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getSubjectID());
                 JOptionPane.showMessageDialog(this, "Subject enrolled successfully!");
                 updateStudentInfoPanel(studentID); // Cập nhật thông tin sinh viên

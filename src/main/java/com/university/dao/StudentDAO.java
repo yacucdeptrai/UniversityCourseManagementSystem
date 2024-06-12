@@ -3,7 +3,6 @@ package main.java.com.university.dao;
 import main.java.com.university.model.Student;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,6 +108,18 @@ public class StudentDAO {
         String sql = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, studentID);
+            stmt.setInt(2, subjectID);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeCourseFromStudent(int studentID, int subjectID) {
+        String query = "DELETE FROM enrollments WHERE student_id = ? AND subject_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, studentID);
             stmt.setInt(2, subjectID);
             stmt.executeUpdate();
