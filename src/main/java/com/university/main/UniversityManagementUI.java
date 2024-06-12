@@ -22,7 +22,7 @@ public class UniversityManagementUI extends JFrame {
     private JButton btnEnrollStudent, btnAssignCourse, btnEditStudent, btnDeleteStudent;
     private JButton btnAddLecturer, btnEditLecturer, btnDeleteLecturer;
     private JButton btnAddSubject, btnEditSubject, btnDeleteSubject;
-    private JLabel lblStudentInfo;
+    private JLabel lblStudentInfo, lblLecturerInfo;
 
     public UniversityManagementUI() {
         setTitle("University Management System");
@@ -175,61 +175,124 @@ public class UniversityManagementUI extends JFrame {
         lblStudentInfo.setText(info.toString());
     }
 
-
-
     private JPanel createLecturerManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        lecturerTableModel = new DefaultTableModel(new String[]{"ID", "Name", "Date of Birth", "Gender"}, 0);
+        // Tạo bảng giảng viên
+        lecturerTableModel = new DefaultTableModel(new String[]{"ID", "Name"}, 0);
         lecturerTable = new JTable(lecturerTableModel);
         lecturerTable.setRowHeight(25);
         lecturerTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+        lecturerTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+        lecturerTable.getColumnModel().getColumn(0).setMinWidth(50);
+        lecturerTable.getColumnModel().getColumn(0).setMaxWidth(50);
+
+        // Căn giữa nội dung bảng
         centerTableData(lecturerTable);
 
         JScrollPane scrollPane = new JScrollPane(lecturerTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
+        // Thêm thanh tìm kiếm
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         lecturerSearchField = new JTextField(20);
         lecturerSearchField.setToolTipText("Search...");
         searchPanel.add(new JLabel("Search:"));
         searchPanel.add(lecturerSearchField);
 
+        // Bộ lọc bảng giảng viên
         TableRowSorter<DefaultTableModel> lecturerSorter = new TableRowSorter<>(lecturerTableModel);
         lecturerTable.setRowSorter(lecturerSorter);
         lecturerSearchField.getDocument().addDocumentListener(new SearchListener(lecturerSearchField, lecturerSorter));
 
         panel.add(searchPanel, BorderLayout.NORTH);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnAddLecturer = new JButton("Add Lecturer");
-        btnEditLecturer = new JButton("Edit Lecturer");
         btnDeleteLecturer = new JButton("Delete Lecturer");
 
         buttonPanel.add(btnAddLecturer);
-        buttonPanel.add(btnEditLecturer);
         buttonPanel.add(btnDeleteLecturer);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
+        // Tạo bảng thông tin giảng viên
+        JPanel lecturerInfoPanel = createLecturerInfoPanel();
+        panel.add(lecturerInfoPanel, BorderLayout.EAST);
+
+        // Nạp dữ liệu
         loadLecturers();
 
+        // Thêm sự kiện
         btnAddLecturer.addActionListener(e -> {
             new AddLecturerDialog(UniversityManagementUI.this).setVisible(true);
-            loadLecturers();
+            loadLecturers(); // Làm mới bảng sau khi thêm
         });
+
+        btnDeleteLecturer.addActionListener(e -> {
+            deleteLecturer();
+            loadLecturers(); // Làm mới bảng sau khi xóa
+        });
+
+        lecturerTable.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
+                updateLecturerInfoPanel();
+            }
+        });
+
+        return panel;
+    }
+
+    private JPanel createLecturerInfoPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Lecturer Info"));
+        panel.setPreferredSize(new Dimension(300, 0));
+
+        // Sử dụng JPanel với FlowLayout để căn trái thông tin
+        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        lblLecturerInfo = new JLabel();
+        lblLecturerInfo.setVerticalAlignment(SwingConstants.TOP); // Đảm bảo văn bản bắt đầu từ đỉnh
+        lblLecturerInfo.setFont(new Font("Tahoma", Font.PLAIN, 14)); // Đặt phông chữ cho nhãn
+
+        infoPanel.add(lblLecturerInfo);
+        panel.add(infoPanel, BorderLayout.CENTER);
+
+        btnEditLecturer = new JButton("Edit Lecturer");
+        panel.add(btnEditLecturer, BorderLayout.SOUTH);
 
         btnEditLecturer.addActionListener(e -> {
             editLecturer();
             loadLecturers();
         });
 
-        btnDeleteLecturer.addActionListener(e -> {
-            deleteLecturer();
-            loadLecturers();
-        });
-
         return panel;
+    }
+
+    // Phiên bản không tham số
+    private void updateLecturerInfoPanel() {
+        int selectedRow = lecturerTable.getSelectedRow();
+        if (selectedRow != -1) {
+            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
+            int modelRow = lecturerTable.convertRowIndexToModel(selectedRow);
+            int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
+            updateLecturerInfoPanel(lecturerID); // Sử dụng phiên bản có tham số
+        } else {
+            lblLecturerInfo.setText("<html><br/><br/><br/>Select a lecturer to see details.</html>");
+        }
+    }
+
+    // Phiên bản nhận lecturerID
+    private void updateLecturerInfoPanel(int lecturerID) {
+        Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
+
+        StringBuilder info = new StringBuilder("<html>");
+        info.append("<b>ID:</b> ").append(lecturer.getLecturerID()).append("<br/>");
+        info.append("<b>Name:</b> ").append(lecturer.getName()).append("<br/>");
+        info.append("<b>Date of Birth:</b> ").append(lecturer.getDateOfBirth()).append("<br/>");
+        info.append("<b>Gender:</b> ").append(lecturer.getGender()).append("<br/>");
+        info.append("</html>");
+        lblLecturerInfo.setText(info.toString());
     }
 
     private JPanel createSubjectManagementPanel() {
