@@ -16,15 +16,14 @@ public class EditLecturerDialog extends JDialog {
     private JTextField nameField;
     private JDateChooser dateChooser;
     private JComboBox<String> genderComboBox;
-    private JButton btnEditLecturer;
-
+    private JButton btnSave;
     private Lecturer lecturer;
 
     public EditLecturerDialog(Frame parent, Lecturer lecturer) {
         super(parent, "Edit Lecturer", true);
         this.lecturer = lecturer;
         setLayout(new GridBagLayout());
-        setSize(400, 300);
+        setSize(270, 180);
         setLocationRelativeTo(parent);
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -38,7 +37,6 @@ public class EditLecturerDialog extends JDialog {
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.WEST;
         nameField = new JTextField(lecturer.getName());
         add(nameField, gbc);
 
@@ -66,26 +64,22 @@ public class EditLecturerDialog extends JDialog {
         genderComboBox.setSelectedItem(lecturer.getGender());
         add(genderComboBox, gbc);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-        btnEditLecturer = new JButton("Edit Lecturer");
-        btnEditLecturer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editLecturer();
-            }
-        });
-        buttonPanel.add(btnEditLecturer);
-
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.EAST;
-        add(buttonPanel, gbc);
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        btnSave = new JButton("Save");
+        btnSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveLecturer();
+            }
+        });
+        add(btnSave, gbc);
     }
 
-    private void editLecturer() {
+    private void saveLecturer() {
         String name = nameField.getText();
         Date selectedDate = dateChooser.getDate();
         LocalDate dateOfBirth = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -94,6 +88,7 @@ public class EditLecturerDialog extends JDialog {
         lecturer.setName(name);
         lecturer.setDateOfBirth(dateOfBirth);
         lecturer.setGender(gender);
+
         new LecturerDAO().updateLecturer(lecturer);
 
         JOptionPane.showMessageDialog(this, "Lecturer updated successfully!");

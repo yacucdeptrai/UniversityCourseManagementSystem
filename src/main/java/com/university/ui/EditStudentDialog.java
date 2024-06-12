@@ -20,7 +20,7 @@ public class EditStudentDialog extends JDialog {
     private JComboBox<String> genderComboBox;
     private JList<String> subjectList;
     private DefaultListModel<String> subjectListModel;
-    private JButton btnEditStudent;
+    private JButton btnSave;
     private JButton btnRemoveSubject;
 
     private Student student;
@@ -29,7 +29,7 @@ public class EditStudentDialog extends JDialog {
         super(parent, "Edit Student", true);
         this.student = student;
         setLayout(new GridBagLayout());
-        setSize(300, 350);
+        setSize(350, 350);
         setLocationRelativeTo(parent);
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -85,7 +85,7 @@ public class EditStudentDialog extends JDialog {
         subjectList = new JList<>(subjectListModel);
         subjectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         for (Subject subject : new SubjectDAO().getSubjectsByStudentID(student.getStudentID())) {
-            subjectListModel.addElement(subject.getSubjectName() + " (" + subject.getCredits() + " credits)");
+            subjectListModel.addElement(subject.getSubjectID() + " - " + subject.getSubjectName());
         }
         add(new JScrollPane(subjectList), gbc);
 
@@ -99,14 +99,14 @@ public class EditStudentDialog extends JDialog {
         });
         buttonPanel.add(btnRemoveSubject);
 
-        btnEditStudent = new JButton("Edit Student");
-        btnEditStudent.addActionListener(new ActionListener() {
+        btnSave = new JButton("Save");
+        btnSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                editStudent();
+                saveStudent();
             }
         });
-        buttonPanel.add(btnEditStudent);
+        buttonPanel.add(btnSave);
 
         gbc.gridx = 0;
         gbc.gridy = 4;
@@ -116,7 +116,7 @@ public class EditStudentDialog extends JDialog {
         add(buttonPanel, gbc);
     }
 
-    private void editStudent() {
+    private void saveStudent() {
         String name = nameField.getText();
         Date selectedDate = dateChooser.getDate();
         LocalDate dateOfBirth = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -135,9 +135,8 @@ public class EditStudentDialog extends JDialog {
         int selectedIndex = subjectList.getSelectedIndex();
         if (selectedIndex != -1) {
             String selectedSubjectText = subjectListModel.getElementAt(selectedIndex);
-            String subjectName = selectedSubjectText.split(" \\(")[0];
-            Subject subject = new SubjectDAO().getSubjectByName(subjectName);
-            new StudentDAO().removeCourseFromStudent(student.getStudentID(), subject.getSubjectID());
+            int subjectID = Integer.parseInt(selectedSubjectText.split(" - ")[0]);
+            new StudentDAO().removeCourseFromStudent(student.getStudentID(), subjectID);
             subjectListModel.remove(selectedIndex);
             JOptionPane.showMessageDialog(this, "Subject removed successfully.");
         } else {

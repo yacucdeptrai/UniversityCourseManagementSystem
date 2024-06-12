@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS subjects (
 
 -- Tạo bảng 'enrollments'
 CREATE TABLE IF NOT EXISTS enrollments (
-    student_id INT NOT NULL,
-    subject_id INT NOT NULL,
+    student_id INT,
+    subject_id INT,
     PRIMARY KEY (student_id, subject_id),
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE

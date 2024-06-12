@@ -40,7 +40,7 @@ public class SubjectDAO {
     }
 
     public Subject getSubjectByName(String subjectName) {
-        String sql = "SELECT s.subject_id, s.subject_name, s.credits, " +
+        String sql = "SELECT s.subject_id, s.name AS subject_name, s.credits, " +
                 "l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
                 "FROM subjects s " +
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
