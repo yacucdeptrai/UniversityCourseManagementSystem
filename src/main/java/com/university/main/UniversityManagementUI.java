@@ -319,8 +319,8 @@ public class UniversityManagementUI extends JFrame {
 
         panel.add(searchPanel, BorderLayout.NORTH);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        btnAddSubject = new JButton("Add Subject");
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        btnAddSubject = new JButton("Create Subject");
         btnEditSubject = new JButton("Edit Subject");
         btnDeleteSubject = new JButton("Delete Subject");
 
@@ -506,9 +506,12 @@ public class UniversityManagementUI extends JFrame {
     private void editSubject() {
         int selectedRow = subjectTable.getSelectedRow();
         if (selectedRow != -1) {
-            int subjectID = (int) subjectTableModel.getValueAt(selectedRow, 0);
+            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
+            int modelRow = subjectTable.convertRowIndexToModel(selectedRow);
+            int subjectID = (int) subjectTableModel.getValueAt(modelRow, 0);  // Lấy ID của môn học
             Subject subject = new SubjectDAO().getSubjectById(subjectID);
             new EditSubjectDialog(this, subject).setVisible(true);
+            loadSubjects();  // Làm mới bảng sau khi chỉnh sửa
         } else {
             JOptionPane.showMessageDialog(this, "Please select a subject to edit.", "Error", JOptionPane.ERROR_MESSAGE);
         }
