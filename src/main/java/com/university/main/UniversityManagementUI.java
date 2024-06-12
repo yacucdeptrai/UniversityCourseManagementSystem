@@ -475,10 +475,11 @@ public class UniversityManagementUI extends JFrame {
     private void deleteStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow != -1) {
-            int studentID = (int) studentTableModel.getValueAt(selectedRow, 0);
+            int modelRow = studentTable.convertRowIndexToModel(selectedRow);
+            int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
             new StudentDAO().deleteStudent(studentID);
             JOptionPane.showMessageDialog(this, "Student deleted successfully!");
-            loadStudents();
+            loadStudents(); // Refresh after deleting
         } else {
             JOptionPane.showMessageDialog(this, "Please select a student to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -502,10 +503,11 @@ public class UniversityManagementUI extends JFrame {
     private void deleteLecturer() {
         int selectedRow = lecturerTable.getSelectedRow();
         if (selectedRow != -1) {
-            int lecturerID = (int) lecturerTableModel.getValueAt(selectedRow, 0);
+            int modelRow = lecturerTable.convertRowIndexToModel(selectedRow);
+            int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
             new LecturerDAO().deleteLecturer(lecturerID);
             JOptionPane.showMessageDialog(this, "Lecturer deleted successfully!");
-            loadLecturers();
+            loadLecturers(); // Refresh after deleting
         } else {
             JOptionPane.showMessageDialog(this, "Please select a lecturer to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -528,7 +530,8 @@ public class UniversityManagementUI extends JFrame {
     private void deleteSubject() {
         int selectedRow = subjectTable.getSelectedRow();
         if (selectedRow != -1) {
-            int subjectID = (int) subjectTableModel.getValueAt(selectedRow, 0);
+            int modelRow = subjectTable.convertRowIndexToModel(selectedRow);
+            int subjectID = (int) subjectTableModel.getValueAt(modelRow, 0);
             new SubjectDAO().deleteSubject(subjectID);
             JOptionPane.showMessageDialog(this, "Subject deleted successfully!");
             loadSubjects();
