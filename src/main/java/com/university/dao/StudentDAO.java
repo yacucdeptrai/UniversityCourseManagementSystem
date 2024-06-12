@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StudentDAO {
-
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT students.student_id, persons.name, persons.date_of_birth, persons.gender " +
@@ -101,25 +100,13 @@ public class StudentDAO {
         return student;
     }
 
-    public void enrollStudentInSubject(int studentID, int subjectID) {
-        String sql = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
+    public void assignCourseToStudent(int studentID, int subjectID) {
+        String query = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, studentID);
-            pstmt.setInt(2, subjectID);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void removeStudentFromSubject(int studentID, int subjectID) {
-        String sql = "DELETE FROM enrollments WHERE student_id = ? AND subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, studentID);
-            pstmt.setInt(2, subjectID);
-            pstmt.executeUpdate();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, studentID);
+            stmt.setInt(2, subjectID);
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

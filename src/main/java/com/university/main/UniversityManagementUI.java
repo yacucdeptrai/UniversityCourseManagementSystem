@@ -143,14 +143,23 @@ public class UniversityManagementUI extends JFrame {
         return panel;
     }
 
+    // Phiên bản không tham số
     private void updateStudentInfoPanel() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow != -1) {
             // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
             int modelRow = studentTable.convertRowIndexToModel(selectedRow);
             int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
-            Student student = new StudentDAO().getStudentById(studentID);
+            updateStudentInfoPanel(studentID); // Sử dụng phiên bản có tham số
+        } else {
+            lblStudentInfo.setText("<html><br/><br/><br/>Select a student to see details.</html>");
+        }
+    }
 
+    // Phiên bản nhận studentID
+    private void updateStudentInfoPanel(int studentID) {
+        Student student = new StudentDAO().getStudentById(studentID);
+        if (student != null) {
             StringBuilder info = new StringBuilder("<html>");
             info.append("<b>ID:</b> ").append(student.getStudentID()).append("<br/>");
             info.append("<b>Name:</b> ").append(student.getName()).append("<br/>");
@@ -168,6 +177,7 @@ public class UniversityManagementUI extends JFrame {
             lblStudentInfo.setText("<html><br/><br/><br/>Select a student to see details.</html>");
         }
     }
+
 
     private JPanel createLecturerManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -327,13 +337,30 @@ public class UniversityManagementUI extends JFrame {
         }
     }
 
+    // Trong UniversityManagementUI.java:
     private void assignCourseToStudent() {
-        int selectedRow = studentTable.getSelectedRow();
-        if (selectedRow != -1) {
-            int studentID = (int) studentTableModel.getValueAt(selectedRow, 0);
-            new AssignCourseDialog(this, studentID).setVisible(true);
+        int selectedStudentRow = studentTable.getSelectedRow();
+        if (selectedStudentRow != -1) {
+            int studentID = (int) studentTableModel.getValueAt(selectedStudentRow, 0);
+            Subject selectedSubject = (Subject) JOptionPane.showInputDialog(
+                    this,
+                    "Select a Subject to Enroll:",
+                    "Enroll Subject",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new SubjectDAO().getAllSubjects().toArray(),
+                    null
+            );
+
+            if (selectedSubject != null) {
+                new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getSubjectID());
+                JOptionPane.showMessageDialog(this, "Subject assigned successfully!");
+                updateStudentInfoPanel();
+            } else {
+                JOptionPane.showMessageDialog(this, "No subject selected.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a student to assign course.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select a student first.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

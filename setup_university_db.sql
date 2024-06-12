@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS lecturers (
     lecturer_id INT PRIMARY KEY,
     person_id INT,
-    FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE
+    gender VARCHAR(10)
 );
 
 -- Tạo bảng 'subjects'

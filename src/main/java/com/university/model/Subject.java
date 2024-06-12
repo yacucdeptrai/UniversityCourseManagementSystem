@@ -4,13 +4,13 @@ public class Subject {
     private int subjectID;
     private String subjectName;
     private Lecturer lecturer;
-    private int credits; // Thêm trường này
+    private int credits;
 
     public Subject(int subjectID, String subjectName, Lecturer lecturer, int credits) {
         this.subjectID = subjectID;
         this.subjectName = subjectName;
         this.lecturer = lecturer;
-        this.credits = credits; // Cập nhật constructor
+        this.credits = credits;
     }
 
     // Các phương thức getter và setter
