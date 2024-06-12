@@ -22,7 +22,7 @@ public class UniversityManagementUI extends JFrame {
     private JButton btnEnrollStudent, btnAssignCourse, btnEditStudent, btnDeleteStudent;
     private JButton btnAddLecturer, btnEditLecturer, btnDeleteLecturer;
     private JButton btnAddSubject, btnEditSubject, btnDeleteSubject;
-    private JLabel lblStudentInfo;
+    private JLabel lblStudentInfo, lblLecturerInfo;
 
     public UniversityManagementUI() {
         setTitle("University Management System");
@@ -175,15 +175,14 @@ public class UniversityManagementUI extends JFrame {
         lblStudentInfo.setText(info.toString());
     }
 
-
-
     private JPanel createLecturerManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        lecturerTableModel = new DefaultTableModel(new String[]{"ID", "Name", "Date of Birth", "Gender"}, 0);
+        lecturerTableModel = new DefaultTableModel(new String[]{"ID", "Name"}, 0);
         lecturerTable = new JTable(lecturerTableModel);
         lecturerTable.setRowHeight(25);
         lecturerTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
         centerTableData(lecturerTable);
 
         JScrollPane scrollPane = new JScrollPane(lecturerTable);
@@ -201,16 +200,15 @@ public class UniversityManagementUI extends JFrame {
 
         panel.add(searchPanel, BorderLayout.NORTH);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnAddLecturer = new JButton("Add Lecturer");
-        btnEditLecturer = new JButton("Edit Lecturer");
         btnDeleteLecturer = new JButton("Delete Lecturer");
-
         buttonPanel.add(btnAddLecturer);
-        buttonPanel.add(btnEditLecturer);
         buttonPanel.add(btnDeleteLecturer);
-
         panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        JPanel lecturerInfoPanel = createLecturerInfoPanel();
+        panel.add(lecturerInfoPanel, BorderLayout.EAST);
 
         loadLecturers();
 
@@ -219,17 +217,57 @@ public class UniversityManagementUI extends JFrame {
             loadLecturers();
         });
 
-        btnEditLecturer.addActionListener(e -> {
-            editLecturer();
-            loadLecturers();
-        });
-
         btnDeleteLecturer.addActionListener(e -> {
             deleteLecturer();
             loadLecturers();
         });
 
+        lecturerTable.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
+                updateLecturerInfoPanel();
+            }
+        });
+
         return panel;
+    }
+
+    private JPanel createLecturerInfoPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Lecturer Info"));
+        panel.setPreferredSize(new Dimension(300, 0));
+
+        lblLecturerInfo = new JLabel("<html><br/><br/><br/>Select a lecturer to see details.</html>", SwingConstants.LEFT);
+        panel.add(lblLecturerInfo, BorderLayout.CENTER);
+
+        btnEditLecturer = new JButton("Edit Lecturer");
+        panel.add(btnEditLecturer, BorderLayout.SOUTH);
+
+        btnEditLecturer.addActionListener(e -> {
+            editLecturer();
+            loadLecturers();
+        });
+
+        return panel;
+    }
+
+    private void updateLecturerInfoPanel() {
+        int selectedRow = lecturerTable.getSelectedRow();
+        if (selectedRow != -1) {
+            int modelRow = lecturerTable.convertRowIndexToModel(selectedRow);
+            int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
+            Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
+
+            StringBuilder info = new StringBuilder("<html>");
+            info.append("<b>ID:</b> ").append(lecturer.getLecturerID()).append("<br/>");
+            info.append("<b>Name:</b> ").append(lecturer.getName()).append("<br/>");
+            info.append("<b>Date of Birth:</b> ").append(lecturer.getDateOfBirth()).append("<br/>");
+            info.append("<b>Gender:</b> ").append(lecturer.getGender()).append("<br/>");
+
+            info.append("</html>");
+            lblLecturerInfo.setText(info.toString());
+        } else {
+            lblLecturerInfo.setText("<html><br/><br/><br/>Select a lecturer to see details.</html>");
+        }
     }
 
     private JPanel createSubjectManagementPanel() {
@@ -239,6 +277,7 @@ public class UniversityManagementUI extends JFrame {
         subjectTable = new JTable(subjectTableModel);
         subjectTable.setRowHeight(25);
         subjectTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
         centerTableData(subjectTable);
 
         JScrollPane scrollPane = new JScrollPane(subjectTable);

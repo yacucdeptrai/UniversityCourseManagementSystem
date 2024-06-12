@@ -10,26 +10,77 @@ import java.util.List;
 public class LecturerDAO {
     public List<Lecturer> getAllLecturers() {
         List<Lecturer> lecturers = new ArrayList<>();
-        String sql = "SELECT l.lecturer_id, p.name, p.date_of_birth, p.gender " +
-                "FROM lecturers l " +
-                "JOIN persons p ON l.person_id = p.id";
+        String sql = "SELECT p.id, p.name, p.date_of_birth, p.gender " +
+                "FROM persons p " +
+                "JOIN lecturers l ON p.id = l.person_id";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (Connection connection = DatabaseConnection.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
 
-            while (rs.next()) {
-                int lecturerID = rs.getInt("lecturer_id");
-                String name = rs.getString("name");
-                LocalDate dateOfBirth = rs.getDate("date_of_birth").toLocalDate();
-                String gender = rs.getString("gender");
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                LocalDate dateOfBirth = resultSet.getDate("date_of_birth").toLocalDate();
+                String gender = resultSet.getString("gender");
 
-                lecturers.add(new Lecturer(name, dateOfBirth, gender, lecturerID));
+                Lecturer lecturer = new Lecturer(name, dateOfBirth, gender, id);
+                lecturers.add(lecturer);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return lecturers;
+    }
+
+    public Lecturer getLecturerById(int lecturerID) {
+        String sql = "SELECT p.id, p.name, p.date_of_birth, p.gender " +
+                "FROM persons p " +
+                "JOIN lecturers l ON p.id = l.person_id " +
+                "WHERE p.id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, lecturerID);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String name = resultSet.getString("name");
+                    LocalDate dateOfBirth = resultSet.getDate("date_of_birth").toLocalDate();
+                    String gender = resultSet.getString("gender");
+
+                    return new Lecturer(name, dateOfBirth, gender, lecturerID);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void addLecturer(Lecturer lecturer) {
+        String personSql = "INSERT INTO persons (name, date_of_birth, gender) VALUES (?, ?, ?)";
+        String lecturerSql = "INSERT INTO lecturers (person_id) VALUES (?)";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement personStmt = connection.prepareStatement(personSql, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement lecturerStmt = connection.prepareStatement(lecturerSql)) {
+
+            personStmt.setString(1, lecturer.getName());
+            personStmt.setDate(2, Date.valueOf(lecturer.getDateOfBirth()));
+            personStmt.setString(3, lecturer.getGender());
+            personStmt.executeUpdate();
+
+            try (ResultSet generatedKeys = personStmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int personId = generatedKeys.getInt(1);
+                    lecturerStmt.setInt(1, personId);
+                    lecturerStmt.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void saveLecturer(Lecturer lecturer) {
@@ -65,52 +116,29 @@ public class LecturerDAO {
     }
 
     public void updateLecturer(Lecturer lecturer) {
-        String personSql = "UPDATE persons SET name = ?, date_of_birth = ?, gender = ? " +
-                "WHERE id = (SELECT person_id FROM lecturers WHERE lecturer_id = ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement personStmt = conn.prepareStatement(personSql)) {
-            personStmt.setString(1, lecturer.getName());
-            personStmt.setDate(2, Date.valueOf(lecturer.getDateOfBirth()));
-            personStmt.setString(3, lecturer.getGender());
-            personStmt.setInt(4, lecturer.getLecturerID());
-            personStmt.executeUpdate();
+        String sql = "UPDATE persons SET name = ?, date_of_birth = ?, gender = ? WHERE id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, lecturer.getName());
+            preparedStatement.setDate(2, Date.valueOf(lecturer.getDateOfBirth()));
+            preparedStatement.setString(3, lecturer.getGender());
+            preparedStatement.setInt(4, lecturer.getLecturerID());
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void deleteLecturer(int lecturerID) {
-        String sql = "DELETE FROM lecturers WHERE lecturer_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, lecturerID);
-            stmt.executeUpdate();
+        String sql = "DELETE FROM persons WHERE id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, lecturerID);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public Lecturer getLecturerById(int lecturerID) {
-        String sql = "SELECT l.lecturer_id, p.name, p.date_of_birth, p.gender " +
-                "FROM lecturers l " +
-                "JOIN persons p ON l.person_id = p.id " +
-                "WHERE l.lecturer_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, lecturerID);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String name = rs.getString("name");
-                    LocalDate dateOfBirth = rs.getDate("date_of_birth").toLocalDate();
-                    String gender = rs.getString("gender");
-                    return new Lecturer(name, dateOfBirth, gender, lecturerID);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
