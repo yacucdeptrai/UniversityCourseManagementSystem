@@ -460,9 +460,13 @@ public class UniversityManagementUI extends JFrame {
     private void editStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow != -1) {
-            int studentID = (int) studentTableModel.getValueAt(selectedRow, 0);
+            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
+            int modelRow = studentTable.convertRowIndexToModel(selectedRow);
+            int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
             Student student = new StudentDAO().getStudentById(studentID);
             new EditStudentDialog(this, student).setVisible(true);
+            // Cập nhật bảng sau khi chỉnh sửa
+            loadStudents();
         } else {
             JOptionPane.showMessageDialog(this, "Please select a student to edit.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -483,9 +487,13 @@ public class UniversityManagementUI extends JFrame {
     private void editLecturer() {
         int selectedRow = lecturerTable.getSelectedRow();
         if (selectedRow != -1) {
-            int lecturerID = (int) lecturerTableModel.getValueAt(selectedRow, 0);
+            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
+            int modelRow = lecturerTable.convertRowIndexToModel(selectedRow);
+            int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
             Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
             new EditLecturerDialog(this, lecturer).setVisible(true);
+            // Cập nhật bảng sau khi chỉnh sửa
+            loadLecturers();
         } else {
             JOptionPane.showMessageDialog(this, "Please select a lecturer to edit.", "Error", JOptionPane.ERROR_MESSAGE);
         }
