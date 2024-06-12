@@ -174,27 +174,24 @@ public class SubjectDAO {
     }
 
     public void assignCourseToStudent(int studentID, int subjectID) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            // Kiểm tra xem sinh viên đã đăng ký khóa học này chưa
-            String checkSql = "SELECT COUNT(*) FROM enrollments WHERE student_id = ? AND subject_id = ?";
-            PreparedStatement checkStatement = connection.prepareStatement(checkSql);
-            checkStatement.setInt(1, studentID);
-            checkStatement.setInt(2, subjectID);
-            ResultSet rs = checkStatement.executeQuery();
-            rs.next();
-            int count = rs.getInt(1);
-            if (count > 0) {
-                // Nếu sinh viên đã đăng ký khóa học này, hiển thị thông báo và không thêm mới
-                System.out.println("Student has already enrolled in this course.");
-                return;
-            }
-            // Nếu chưa đăng ký, thêm mới vào bảng enrollments
-            String sql = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, studentID);
             statement.setInt(2, subjectID);
             statement.executeUpdate();
-            System.out.println("Course assigned successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeCourseFromStudent(int studentID, int subjectID) {
+        String sql = "DELETE FROM enrollments WHERE student_id = ? AND subject_id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, studentID);
+            statement.setInt(2, subjectID);
+            statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

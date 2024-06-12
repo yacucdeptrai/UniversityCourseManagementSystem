@@ -10,21 +10,19 @@ import java.util.List;
 public class LecturerDAO {
     public List<Lecturer> getAllLecturers() {
         List<Lecturer> lecturers = new ArrayList<>();
-        String sql = "SELECT p.id, p.name, p.date_of_birth, p.gender " +
-                "FROM persons p " +
-                "JOIN lecturers l ON p.id = l.person_id";
-
+        String sql = "SELECT l.lecturer_id, p.name, p.date_of_birth, p.gender " +
+                "FROM lecturers l " +
+                "JOIN persons p ON l.person_id = p.id";
         try (Connection connection = DatabaseConnection.getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
-
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
+                int lecturerID = resultSet.getInt("lecturer_id");
                 String name = resultSet.getString("name");
                 LocalDate dateOfBirth = resultSet.getDate("date_of_birth").toLocalDate();
                 String gender = resultSet.getString("gender");
 
-                Lecturer lecturer = new Lecturer(name, dateOfBirth, gender, id);
+                Lecturer lecturer = new Lecturer(name, dateOfBirth, gender, lecturerID);
                 lecturers.add(lecturer);
             }
         } catch (SQLException e) {
@@ -34,16 +32,14 @@ public class LecturerDAO {
     }
 
     public Lecturer getLecturerById(int lecturerID) {
-        String sql = "SELECT p.id, p.name, p.date_of_birth, p.gender " +
-                "FROM persons p " +
-                "JOIN lecturers l ON p.id = l.person_id " +
-                "WHERE p.id = ?";
-
+        String sql = "SELECT l.lecturer_id, p.name, p.date_of_birth, p.gender " +
+                "FROM lecturers l " +
+                "JOIN persons p ON l.person_id = p.id " +
+                "WHERE l.lecturer_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, lecturerID);
-
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, lecturerID);
+            try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     String name = resultSet.getString("name");
                     LocalDate dateOfBirth = resultSet.getDate("date_of_birth").toLocalDate();
