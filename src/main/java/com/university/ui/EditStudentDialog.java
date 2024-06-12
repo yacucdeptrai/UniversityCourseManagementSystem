@@ -13,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
 
 public class EditStudentDialog extends JDialog {
     private JTextField nameField;
@@ -38,12 +37,13 @@ public class EditStudentDialog extends JDialog {
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.anchor = GridBagConstraints.WEST;
         add(new JLabel("Name:"), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
         nameField = new JTextField(student.getName());
         add(nameField, gbc);
 
