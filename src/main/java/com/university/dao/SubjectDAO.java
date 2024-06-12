@@ -11,16 +11,14 @@ import java.util.List;
 public class SubjectDAO {
     public List<Subject> getAllSubjects() {
         List<Subject> subjects = new ArrayList<>();
-        String sql = "SELECT s.subject_id, s.subject_name, s.credits, " +
+        String sql = "SELECT s.subject_id, s.name AS subject_name, s.credits, " +
                 "l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
                 "FROM subjects s " +
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id";
-
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
-
             while (resultSet.next()) {
                 int subjectID = resultSet.getInt("subject_id");
                 String subjectName = resultSet.getString("subject_name");
@@ -38,7 +36,6 @@ public class SubjectDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return subjects;
     }
 
@@ -77,7 +74,7 @@ public class SubjectDAO {
     // Lấy môn học theo ID sinh viên
     public List<Subject> getSubjectsByStudentID(int studentID) {
         List<Subject> subjects = new ArrayList<>();
-        String sql = "SELECT s.subject_id, s.subject_name, s.credits, l.lecturer_id, p.name " +
+        String sql = "SELECT s.subject_id, s.name AS subject_name, s.credits, l.lecturer_id, p.name " +
                 "FROM subjects s " +
                 "JOIN enrollments e ON s.subject_id = e.subject_id " +
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
@@ -109,16 +106,14 @@ public class SubjectDAO {
 
     // Lấy môn học theo ID
     public Subject getSubjectById(int subjectID) {
-        String sql = "SELECT s.subject_id, s.subject_name, s.credits, " +
+        String sql = "SELECT s.subject_id, s.name AS subject_name, s.credits, " +
                 "l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
                 "FROM subjects s " +
                 "JOIN lecturers l ON s.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id " +
                 "WHERE s.subject_id = ?";
-
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setInt(1, subjectID);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -140,93 +135,41 @@ public class SubjectDAO {
         return null;
     }
 
-
-    public boolean addSubject(Subject subject) {
-        String sql = "INSERT INTO subjects (subject_name, credits, lecturer_id) VALUES (?, ?, ?)";
-
+    public void updateSubject(Subject subject) {
+        String sql = "UPDATE subjects SET name = ?, credits = ?, lecturer_id = ? WHERE subject_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            statement.setString(1, subject.getSubjectName());
-            statement.setInt(2, subject.getCredits());
-            statement.setInt(3, subject.getLecturer().getLecturerID());
-
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean updateSubject(Subject subject) {
-        String sql = "UPDATE subjects SET subject_name = ?, credits = ?, lecturer_id = ? WHERE subject_id = ?";
-
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setString(1, subject.getSubjectName());
             statement.setInt(2, subject.getCredits());
             statement.setInt(3, subject.getLecturer().getLecturerID());
             statement.setInt(4, subject.getSubjectID());
-
-            return statement.executeUpdate() > 0;
+            statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
-    // Lưu môn học (cập nhật hoặc thêm mới)
     public void saveSubject(Subject subject) {
-        String checkSql = "SELECT COUNT(*) FROM subjects WHERE subject_id = ?";
-        boolean exists = false;
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-
-            checkStmt.setInt(1, subject.getSubjectID());
-            try (ResultSet rs = checkStmt.executeQuery()) {
-                if (rs.next()) {
-                    exists = rs.getInt(1) > 0;
-                }
-            }
-            if (exists) {
-                // Cập nhật môn học nếu đã tồn tại
-                String updateSql = "UPDATE subjects SET subject_name = ?, credits = ?, lecturer_id = ? WHERE subject_id = ?";
-                try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                    updateStmt.setString(1, subject.getSubjectName());
-                    updateStmt.setInt(2, subject.getCredits());
-                    updateStmt.setInt(3, subject.getLecturer().getLecturerID());
-                    updateStmt.setInt(4, subject.getSubjectID());
-                    updateStmt.executeUpdate();
-                }
-            } else {
-                // Thêm mới môn học nếu không tồn tại
-                String insertSql = "INSERT INTO subjects (subject_id, subject_name, credits, lecturer_id) VALUES (?, ?, ?, ?)";
-                try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-                    insertStmt.setInt(1, subject.getSubjectID());
-                    insertStmt.setString(2, subject.getSubjectName());
-                    insertStmt.setInt(3, subject.getCredits());
-                    insertStmt.setInt(4, subject.getLecturer().getLecturerID());
-                    insertStmt.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Xóa môn học
-    public boolean deleteSubject(int subjectID) {
-        String sql = "DELETE FROM subjects WHERE subject_id = ?";
-
+        String sql = "INSERT INTO subjects (name, credits, lecturer_id) VALUES (?, ?, ?)";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            statement.setInt(1, subjectID);
-            return statement.executeUpdate() > 0;
+            statement.setString(1, subject.getSubjectName());
+            statement.setInt(2, subject.getCredits());
+            statement.setInt(3, subject.getLecturer().getLecturerID());
+            statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+        }
+    }
+
+    public void deleteSubject(int subjectID) {
+        String sql = "DELETE FROM subjects WHERE subject_id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, subjectID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
