@@ -10,19 +10,9 @@ public class Lecturer extends Person {
         this.lecturerID = lecturerID;
     }
 
-    @Override
-    public void displayInfo() {
-        System.out.println("Lecturer Name: " + getName());
-        System.out.println("Lecturer ID: " + getLecturerID());
-    }
-
     // Getter và Setter
     public int getLecturerID() {
         return lecturerID;
-    }
-
-    public void setLecturerID(int lecturerID) {
-        this.lecturerID = lecturerID;
     }
 
     @Override

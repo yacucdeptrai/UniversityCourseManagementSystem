@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS auto_subjects (
     subject_name VARCHAR(255) NOT NULL,
     credits INT NOT NULL,
     lecturer_id INT,
-    FOREIGN KEY (lecturer_id) REFERENCES lecturers(lecturer_id)
+    FOREIGN KEY (lecturer_id) REFERENCES lecturers(lecturer_id) ON DELETE CASCADE
 );
 
 -- Bảng custom_subjects với ID tự nhập

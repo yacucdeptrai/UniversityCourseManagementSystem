@@ -13,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
 
 public class EditStudentDialog extends JDialog {
     private JTextField nameField;

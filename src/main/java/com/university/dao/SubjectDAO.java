@@ -4,7 +4,6 @@ import main.java.com.university.model.Lecturer;
 import main.java.com.university.model.Subject;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -197,36 +196,22 @@ public class SubjectDAO {
         }
     }
 
-    public void deleteSubject(int customSubjectID) {
-        String sql = "DELETE FROM auto_subjects WHERE auto_subject_id = (SELECT auto_subject_id FROM custom_subjects WHERE custom_subject_id = ?)";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, customSubjectID);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    // Xóa môn học
+    public void deleteSubject(int subjectID) {
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            // Xóa từ bảng custom_subjects trước
+            String deleteCustomSQL = "DELETE FROM custom_subjects WHERE auto_subject_id = ?";
+            try (PreparedStatement deleteCustomStatement = connection.prepareStatement(deleteCustomSQL)) {
+                deleteCustomStatement.setInt(1, subjectID);
+                deleteCustomStatement.executeUpdate();
+            }
 
-    public void assignCourseToStudent(int studentID, int customSubjectID) {
-        String sql = "INSERT INTO enrollments (student_id, custom_subject_id) VALUES (?, ?)";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, studentID);
-            statement.setInt(2, customSubjectID);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void removeCourseFromStudent(int studentID, int customSubjectID) {
-        String sql = "DELETE FROM enrollments WHERE student_id = ? AND custom_subject_id = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, studentID);
-            statement.setInt(2, customSubjectID);
-            statement.executeUpdate();
+            // Xóa từ bảng auto_subjects
+            String deleteAutoSQL = "DELETE FROM auto_subjects WHERE auto_subject_id = ?";
+            try (PreparedStatement deleteAutoStatement = connection.prepareStatement(deleteAutoSQL)) {
+                deleteAutoStatement.setInt(1, subjectID);
+                deleteAutoStatement.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

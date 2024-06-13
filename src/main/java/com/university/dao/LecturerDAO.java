@@ -101,12 +101,22 @@ public class LecturerDAO {
         }
     }
 
+    // Xóa giảng viên
     public void deleteLecturer(int lecturerID) {
-        String sql = "DELETE FROM lecturers WHERE lecturer_id = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, lecturerID);
-            preparedStatement.executeUpdate();
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            // Xóa tất cả các môn học liên quan trước
+            String deleteSubjectsSQL = "DELETE FROM auto_subjects WHERE lecturer_id = ?";
+            try (PreparedStatement deleteSubjectsStatement = connection.prepareStatement(deleteSubjectsSQL)) {
+                deleteSubjectsStatement.setInt(1, lecturerID);
+                deleteSubjectsStatement.executeUpdate();
+            }
+
+            // Xóa giảng viên
+            String deleteLecturerSQL = "DELETE FROM lecturers WHERE lecturer_id = ?";
+            try (PreparedStatement deleteLecturerStatement = connection.prepareStatement(deleteLecturerSQL)) {
+                deleteLecturerStatement.setInt(1, lecturerID);
+                deleteLecturerStatement.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

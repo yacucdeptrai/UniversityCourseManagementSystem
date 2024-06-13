@@ -507,7 +507,7 @@ public class UniversityManagementUI extends JFrame {
             int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
             new LecturerDAO().deleteLecturer(lecturerID);
             JOptionPane.showMessageDialog(this, "Lecturer deleted successfully!");
-            loadLecturers(); // Refresh after deleting
+            loadLecturers();
         } else {
             JOptionPane.showMessageDialog(this, "Please select a lecturer to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
