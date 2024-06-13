@@ -38,7 +38,7 @@ public class AssignCourseDialog extends JDialog {
         Subject selectedSubject = (Subject) subjectComboBox.getSelectedItem();
         if (selectedSubject != null) {
             SubjectDAO subjectDAO = new SubjectDAO();
-            subjectDAO.assignCourseToStudent(studentID, selectedSubject.getSubjectID());
+            subjectDAO.assignCourseToStudent(studentID, selectedSubject.getCustomSubjectID());
             JOptionPane.showMessageDialog(this, "Course assigned successfully!");
             dispose();
         } else {

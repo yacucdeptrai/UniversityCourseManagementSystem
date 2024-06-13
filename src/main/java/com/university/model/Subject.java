@@ -1,25 +1,38 @@
 package main.java.com.university.model;
 
 public class Subject {
-    private int subjectID;
+    private int customSubjectID;
+    private int autoSubjectID;
     private String subjectName;
-    private Lecturer lecturer;
     private int credits;
+    private Lecturer lecturer;
 
-    public Subject(int subjectID, String subjectName, Lecturer lecturer, int credits) {
-        this.subjectID = subjectID;
+    public Subject() {
+    }
+
+    public Subject(int customSubjectID, int autoSubjectID, String subjectName, int credits, Lecturer lecturer) {
+        this.customSubjectID = customSubjectID;
+        this.autoSubjectID = autoSubjectID;
         this.subjectName = subjectName;
-        this.lecturer = lecturer;
         this.credits = credits;
+        this.lecturer = lecturer;
     }
 
-    // Các phương thức getter và setter
-    public int getSubjectID() {
-        return subjectID;
+    // Các getter và setter
+    public int getCustomSubjectID() {
+        return customSubjectID;
     }
 
-    public void setSubjectID(int subjectID) {
-        this.subjectID = subjectID;
+    public void setCustomSubjectID(int customSubjectID) {
+        this.customSubjectID = customSubjectID;
+    }
+
+    public int getAutoSubjectID() {
+        return autoSubjectID;
+    }
+
+    public void setAutoSubjectID(int autoSubjectID) {
+        this.autoSubjectID = autoSubjectID;
     }
 
     public String getSubjectName() {
@@ -30,14 +43,6 @@ public class Subject {
         this.subjectName = subjectName;
     }
 
-    public Lecturer getLecturer() {
-        return lecturer;
-    }
-
-    public void setLecturer(Lecturer lecturer) {
-        this.lecturer = lecturer;
-    }
-
     public int getCredits() {
         return credits;
     }
@@ -46,8 +51,16 @@ public class Subject {
         this.credits = credits;
     }
 
+    public Lecturer getLecturer() {
+        return lecturer;
+    }
+
+    public void setLecturer(Lecturer lecturer) {
+        this.lecturer = lecturer;
+    }
+
     @Override
     public String toString() {
-        return String.format("%d - %s - %s", subjectID, subjectName, lecturer.getName());
+        return String.format("%d - %s - %s", customSubjectID, subjectName, lecturer.getName());
     }
 }

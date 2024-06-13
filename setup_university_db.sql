@@ -26,22 +26,29 @@ CREATE TABLE IF NOT EXISTS students (
     FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE
 );
 
--- Tạo bảng 'subjects'
-CREATE TABLE IF NOT EXISTS subjects (
-    subject_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+-- Bảng auto_subjects với ID tự sinh
+CREATE TABLE IF NOT EXISTS auto_subjects (
+    auto_subject_id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_name VARCHAR(255) NOT NULL,
     credits INT NOT NULL,
-    lecturer_id INT NOT NULL,
-    FOREIGN KEY (lecturer_id) REFERENCES lecturers(lecturer_id) ON DELETE CASCADE
+    lecturer_id INT,
+    FOREIGN KEY (lecturer_id) REFERENCES lecturers(lecturer_id)
+);
+
+-- Bảng custom_subjects với ID tự nhập
+CREATE TABLE IF NOT EXISTS custom_subjects (
+    custom_subject_id INT PRIMARY KEY,
+    auto_subject_id INT,
+    FOREIGN KEY (auto_subject_id) REFERENCES auto_subjects(auto_subject_id) ON DELETE CASCADE
 );
 
 -- Tạo bảng 'enrollments'
 CREATE TABLE IF NOT EXISTS enrollments (
     student_id INT,
-    subject_id INT,
-    PRIMARY KEY (student_id, subject_id),
+    custom_subject_id INT,
+    PRIMARY KEY (student_id, custom_subject_id),
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE
+    FOREIGN KEY (custom_subject_id) REFERENCES custom_subjects(custom_subject_id) ON DELETE CASCADE
 );
 
 SHOW TABLES LIKE 'persons';

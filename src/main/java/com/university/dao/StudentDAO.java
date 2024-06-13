@@ -104,24 +104,24 @@ public class StudentDAO {
         return student;
     }
 
-    public void assignCourseToStudent(int studentID, int subjectID) {
-        String sql = "INSERT INTO enrollments (student_id, subject_id) VALUES (?, ?)";
+    public void assignCourseToStudent(int studentID, int customSubjectID) {
+        String sql = "INSERT INTO enrollments (student_id, custom_subject_id) VALUES (?, ?)";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, studentID);
-            statement.setInt(2, subjectID);
+            statement.setInt(2, customSubjectID);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void removeCourseFromStudent(int studentID, int subjectID) {
-        String sql = "DELETE FROM enrollments WHERE student_id = ? AND subject_id = ?";
+    public void removeCourseFromStudent(int studentID, int customSubjectID) {
+        String sql = "DELETE FROM enrollments WHERE student_id = ? AND custom_subject_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, studentID);
-            statement.setInt(2, subjectID);
+            statement.setInt(2, customSubjectID);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

@@ -54,31 +54,6 @@ public class LecturerDAO {
         return null;
     }
 
-    public void addLecturer(Lecturer lecturer) {
-        String personSql = "INSERT INTO persons (name, date_of_birth, gender) VALUES (?, ?, ?)";
-        String lecturerSql = "INSERT INTO lecturers (person_id) VALUES (?)";
-
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement personStmt = connection.prepareStatement(personSql, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement lecturerStmt = connection.prepareStatement(lecturerSql)) {
-
-            personStmt.setString(1, lecturer.getName());
-            personStmt.setDate(2, Date.valueOf(lecturer.getDateOfBirth()));
-            personStmt.setString(3, lecturer.getGender());
-            personStmt.executeUpdate();
-
-            try (ResultSet generatedKeys = personStmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int personId = generatedKeys.getInt(1);
-                    lecturerStmt.setInt(1, personId);
-                    lecturerStmt.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void saveLecturer(Lecturer lecturer) {
         String personSql = "INSERT INTO persons (name, date_of_birth, gender) VALUES (?, ?, ?)";
         String lecturerSql = "INSERT INTO lecturers (lecturer_id, person_id) VALUES (?, ?)";

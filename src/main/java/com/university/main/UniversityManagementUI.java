@@ -390,7 +390,7 @@ public class UniversityManagementUI extends JFrame {
         List<Subject> subjects = subjectDAO.getAllSubjects();
         for (Subject subject : subjects) {
             subjectTableModel.addRow(new Object[]{
-                    subject.getSubjectID(),
+                    subject.getCustomSubjectID(),
                     subject.getSubjectName(),
                     subject.getLecturer().getName(),
                     subject.getCredits()
@@ -445,7 +445,7 @@ public class UniversityManagementUI extends JFrame {
                 Subject selectedSubject = (Subject) subjectComboBox.getSelectedItem();
                 if (selectedSubject != null) {
                     // Đăng ký môn học cho sinh viên
-                    new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getSubjectID());
+                    new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getCustomSubjectID());
                     JOptionPane.showMessageDialog(this, "Subject enrolled successfully!");
                     updateStudentInfoPanel(studentID); // Cập nhật thông tin sinh viên
                 } else {
@@ -518,8 +518,8 @@ public class UniversityManagementUI extends JFrame {
         if (selectedRow != -1) {
             // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
             int modelRow = subjectTable.convertRowIndexToModel(selectedRow);
-            int subjectID = (int) subjectTableModel.getValueAt(modelRow, 0);  // Lấy ID của môn học
-            Subject subject = new SubjectDAO().getSubjectById(subjectID);
+            int customSubjectID = (int) subjectTableModel.getValueAt(modelRow, 0);  // Lấy ID của môn học
+            Subject subject = new SubjectDAO().getSubjectByCustomID(customSubjectID);
             new EditSubjectDialog(this, subject).setVisible(true);
             loadSubjects();  // Làm mới bảng sau khi chỉnh sửa
         } else {
@@ -531,8 +531,8 @@ public class UniversityManagementUI extends JFrame {
         int selectedRow = subjectTable.getSelectedRow();
         if (selectedRow != -1) {
             int modelRow = subjectTable.convertRowIndexToModel(selectedRow);
-            int subjectID = (int) subjectTableModel.getValueAt(modelRow, 0);
-            new SubjectDAO().deleteSubject(subjectID);
+            int customSubjectID = (int) subjectTableModel.getValueAt(modelRow, 0);
+            new SubjectDAO().deleteSubject(customSubjectID);
             JOptionPane.showMessageDialog(this, "Subject deleted successfully!");
             loadSubjects();
         } else {
