@@ -334,7 +334,7 @@ public class UniversityManagementUI extends JFrame {
 
         btnAddSubject.addActionListener(e -> {
             new AddSubjectDialog(UniversityManagementUI.this).setVisible(true);
-            loadSubjects();
+            loadSubjects(); // Làm mới bảng sau khi thêm
         });
 
         btnEditSubject.addActionListener(e -> {

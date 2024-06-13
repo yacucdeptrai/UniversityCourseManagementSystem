@@ -7,107 +7,67 @@ import main.java.com.university.model.Subject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.List;
 
 public class AddSubjectDialog extends JDialog {
-    private JTextField customSubjectIDField;
     private JTextField subjectNameField;
     private JTextField creditsField;
-    private JComboBox<Lecturer> lecturerComboBox;
+    private JTextField customSubjectIDField;
+    private JComboBox<String> lecturerComboBox;
     private JButton btnAddSubject;
 
     public AddSubjectDialog(Frame parent) {
         super(parent, "Add Subject", true);
-        setLayout(new GridBagLayout());
-        setSize(400, 300);
-        setLocationRelativeTo(parent);
+        setLayout(new GridLayout(5, 2, 10, 10)); // Tạo bố cục lưới với 5 hàng, 2 cột, khoảng cách giữa các phần tử là 10
+        setSize(300, 250); // Thiết lập kích thước cho cửa sổ
+        setLocationRelativeTo(parent); // Đặt vị trí cửa sổ giữa màn hình
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        add(new JLabel("Custom Subject ID:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JLabel lblID = new JLabel("Custom Subject ID:");
         customSubjectIDField = new JTextField();
-        add(customSubjectIDField, gbc);
+        add(lblID);
+        add(customSubjectIDField);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        add(new JLabel("Subject Name:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 1;
+        JLabel lblName = new JLabel("Subject Name:");
         subjectNameField = new JTextField();
-        add(subjectNameField, gbc);
+        add(lblName);
+        add(subjectNameField);
 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        add(new JLabel("Credits:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 2;
+        JLabel lblCredits = new JLabel("Credits:");
         creditsField = new JTextField();
-        add(creditsField, gbc);
+        add(lblCredits);
+        add(creditsField);
 
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        add(new JLabel("Lecturer:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 3;
+        JLabel lblLecturer = new JLabel("Lecturer:");
         lecturerComboBox = new JComboBox<>();
-        // Load lecturers into the combo box
-        for (Lecturer lecturer : new LecturerDAO().getAllLecturers()) {
-            lecturerComboBox.addItem(lecturer);
+        List<Lecturer> lecturers = new LecturerDAO().getAllLecturers();
+        for (Lecturer lecturer : lecturers) {
+            lecturerComboBox.addItem(lecturer.getName() + " (ID: " + lecturer.getLecturerID() + ")");
         }
-        add(lecturerComboBox, gbc);
+        add(lblLecturer);
+        add(lecturerComboBox);
 
         btnAddSubject = new JButton("Add Subject");
-        btnAddSubject.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addSubject();
-            }
-        });
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(btnAddSubject, gbc);
+        btnAddSubject.addActionListener(e -> addSubject());
+        add(new JLabel()); // Thêm nhãn trống để làm bộ đệm
+        add(btnAddSubject);
     }
 
     private void addSubject() {
-        String customSubjectIDStr = customSubjectIDField.getText();
-        int customSubjectID;
         try {
-            customSubjectID = Integer.parseInt(customSubjectIDStr);
+            int customSubjectID = Integer.parseInt(customSubjectIDField.getText()); // Lấy ID tự nhập từ trường văn bản
+            String subjectName = subjectNameField.getText(); // Lấy tên môn học
+            int credits = Integer.parseInt(creditsField.getText()); // Lấy số tín chỉ
+            String lecturerInfo = (String) lecturerComboBox.getSelectedItem(); // Lấy thông tin giảng viên từ hộp chọn
+            int lecturerID = Integer.parseInt(lecturerInfo.substring(lecturerInfo.indexOf("ID: ") + 4, lecturerInfo.indexOf(")"))); // Trích xuất ID giảng viên từ chuỗi thông tin giảng viên
+
+            Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID); // Lấy đối tượng giảng viên từ ID
+            Subject subject = new Subject(customSubjectID, 0, subjectName, credits, lecturer); // Tạo đối tượng môn học với ID tự nhập và các thông tin khác
+            new SubjectDAO().saveSubject(subject); // Lưu đối tượng môn học vào cơ sở dữ liệu
+
+            JOptionPane.showMessageDialog(this, "Subject added successfully!"); // Hiển thị thông báo thành công
+            dispose(); // Đóng cửa sổ
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid Custom Subject ID.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            JOptionPane.showMessageDialog(this, "Invalid input. Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE); // Hiển thị thông báo lỗi nếu đầu vào không hợp lệ
         }
-
-        String subjectName = subjectNameField.getText();
-        String creditsStr = creditsField.getText();
-        int credits;
-        try {
-            credits = Integer.parseInt(creditsStr);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid Credits.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Lecturer lecturer = (Lecturer) lecturerComboBox.getSelectedItem();
-
-        // Auto-generated subjectID is handled inside DAO
-        Subject subject = new Subject(0, customSubjectID, subjectName, credits, lecturer);
-        new SubjectDAO().saveSubject(subject);
-
-        JOptionPane.showMessageDialog(this, "Subject added successfully!");
-        dispose();
     }
 }
