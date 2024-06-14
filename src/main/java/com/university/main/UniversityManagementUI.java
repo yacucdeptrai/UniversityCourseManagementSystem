@@ -578,6 +578,7 @@ public class UniversityManagementUI extends JFrame {
             new SubjectDAO().deleteSubject(customSubjectID);
             JOptionPane.showMessageDialog(this, "Subject deleted successfully!");
             loadSubjects();
+            // throw
         } else {
             JOptionPane.showMessageDialog(this, "Please select a subject to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
