@@ -146,6 +146,41 @@ public class SubjectDAO {
         return subjects;
     }
 
+    public List<Subject> getSubjectsByLecturerID(int lecturerID) {
+        List<Subject> subjects = new ArrayList<>();
+        String sql = "SELECT cs.custom_subject_id, a.auto_subject_id, a.subject_name, a.credits, l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
+                "FROM custom_subjects cs " +
+                "JOIN auto_subjects a ON cs.auto_subject_id = a.auto_subject_id " +
+                "JOIN lecturers l ON a.lecturer_id = l.lecturer_id " +
+                "JOIN persons p ON l.person_id = p.id " +
+                "WHERE l.lecturer_id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, lecturerID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Subject subject = new Subject();
+                    subject.setCustomSubjectID(resultSet.getInt("custom_subject_id"));
+                    subject.setAutoSubjectID(resultSet.getInt("auto_subject_id"));
+                    subject.setSubjectName(resultSet.getString("subject_name"));
+                    subject.setCredits(resultSet.getInt("credits"));
+
+                    Lecturer lecturer = new Lecturer(
+                            resultSet.getString("lecturer_name"),
+                            resultSet.getDate("date_of_birth").toLocalDate(),
+                            resultSet.getString("gender"),
+                            resultSet.getInt("lecturer_id")
+                    );
+                    subject.setLecturer(lecturer);
+                    subjects.add(subject);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return subjects;
+    }
+
     public void updateSubject(Subject subject) {
         String sql = "UPDATE auto_subjects SET subject_name = ?, credits = ?, lecturer_id = ? WHERE auto_subject_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();

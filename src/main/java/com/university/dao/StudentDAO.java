@@ -104,6 +104,33 @@ public class StudentDAO {
         return student;
     }
 
+    public List<Student> getStudentsBySubjectID(int subjectID) {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT s.student_id, p.name, p.date_of_birth, p.gender " +
+                "FROM enrollments e " +
+                "JOIN students s ON e.student_id = s.student_id " +
+                "JOIN persons p ON s.person_id = p.id " +
+                "WHERE e.custom_subject_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, subjectID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int studentID = rs.getInt("student_id");
+                    String name = rs.getString("name");
+                    Date dob = rs.getDate("date_of_birth");
+                    String gender = rs.getString("gender");
+
+                    Student student = new Student(studentID, name, dob.toLocalDate(), gender);
+                    students.add(student);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
+    }
+
     public void assignCourseToStudent(int studentID, int customSubjectID) {
         String sql = "INSERT INTO enrollments (student_id, custom_subject_id) VALUES (?, ?)";
         try (Connection connection = DatabaseConnection.getConnection();
