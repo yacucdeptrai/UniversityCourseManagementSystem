@@ -364,9 +364,11 @@ public class UniversityManagementUI extends JFrame {
     private void displayTeachingClasses() {
         int selectedRow = lecturerTable.getSelectedRow();
         if (selectedRow != -1) {
+            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
             int modelRow = lecturerTable.convertRowIndexToModel(selectedRow);
             int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
 
+            // Lấy danh sách các môn học giảng viên đang dạy
             List<Subject> subjects = new SubjectDAO().getSubjectsByLecturerID(lecturerID);
 
             if (subjects.isEmpty()) {
@@ -374,6 +376,7 @@ public class UniversityManagementUI extends JFrame {
                 return;
             }
 
+            // Chuyển danh sách môn học thành mảng String để hiển thị trong bảng
             String[] columnNames = {"ID", "Subject Name", "Credits"};
             Object[][] data = new Object[subjects.size()][3];
             for (int i = 0; i < subjects.size(); i++) {
@@ -386,6 +389,7 @@ public class UniversityManagementUI extends JFrame {
             JTable table = new JTable(model);
             table.setRowHeight(25);
 
+            // Căn giữa nội dung bảng
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
             centerRenderer.setHorizontalAlignment(JLabel.CENTER);
             for (int i = 0; i < table.getColumnCount(); i++) {
@@ -396,6 +400,8 @@ public class UniversityManagementUI extends JFrame {
             scrollPane.setPreferredSize(new Dimension(500, 300));
 
             JButton btnShowStudents = new JButton("Show Students");
+            JButton btnClose = new JButton("Close");
+
             btnShowStudents.addActionListener(e -> {
                 int selectedSubjectRow = table.getSelectedRow();
                 if (selectedSubjectRow != -1) {
@@ -407,9 +413,26 @@ public class UniversityManagementUI extends JFrame {
                 }
             });
 
+            // Nút "Close" để đóng hộp thoại
+            btnClose.addActionListener(e -> {
+                // Đóng hộp thoại
+                Window window = SwingUtilities.getWindowAncestor(btnClose);
+                if (window != null) {
+                    window.dispose();
+                }
+            });
+
+            JPanel buttonPanel = new JPanel(new FlowLayout());
+            buttonPanel.add(btnShowStudents);
+            buttonPanel.add(btnClose);
+
+            // Đảm bảo kích thước nút "Close" bằng với nút "Show Students"
+            Dimension buttonSize = btnShowStudents.getPreferredSize();
+            btnClose.setPreferredSize(buttonSize);
+
             JPanel panel = new JPanel(new BorderLayout());
             panel.add(scrollPane, BorderLayout.CENTER);
-            panel.add(btnShowStudents, BorderLayout.SOUTH);
+            panel.add(buttonPanel, BorderLayout.SOUTH);
 
             JOptionPane.showMessageDialog(this, panel, "Classes Taught by Lecturer", JOptionPane.PLAIN_MESSAGE);
         } else {
@@ -435,6 +458,7 @@ public class UniversityManagementUI extends JFrame {
         JTable table = new JTable(data, columnNames);
         table.setRowHeight(25);
 
+        // Căn giữa nội dung bảng
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 0; i < table.getColumnCount(); i++) {
