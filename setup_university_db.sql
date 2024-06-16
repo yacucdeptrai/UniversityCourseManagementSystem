@@ -51,21 +51,6 @@ CREATE TABLE IF NOT EXISTS enrollments (
     FOREIGN KEY (custom_subject_id) REFERENCES custom_subjects(custom_subject_id) ON DELETE CASCADE
 );
 
-SHOW TABLES LIKE 'persons';
-SHOW TABLES LIKE 'lecturers';
-
-INSERT INTO persons (name, date_of_birth, gender) VALUES
-('Nguyễn Hoàng Anh', '1980-04-20', 'Male'),
-('Lê Thị Bích', '1985-06-15', 'Female');
-
-INSERT INTO lecturers (person_id) VALUES
-(1),
-(2);
-
-INSERT INTO subjects (name, credits, lecturer_id) VALUES
-('Lập Trình Java', 3, 1),
-('Lập Trình C#', 3, 2);
-
 -- Xóa dữ liệu cũ (Chỉ sử dụng khi cần làm sạch dữ liệu)
 DELETE FROM enrollments;
 DELETE FROM subjects;

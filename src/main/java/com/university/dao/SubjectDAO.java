@@ -232,23 +232,40 @@ public class SubjectDAO {
     }
 
     // Xóa môn học
-    public void deleteSubject(int subjectID) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            // Xóa từ bảng custom_subjects trước
-            String deleteCustomSQL = "DELETE FROM custom_subjects WHERE auto_subject_id = ?";
-            try (PreparedStatement deleteCustomStatement = connection.prepareStatement(deleteCustomSQL)) {
-                deleteCustomStatement.setInt(1, subjectID);
-                deleteCustomStatement.executeUpdate();
+    public boolean deleteSubject(int customSubjectID) {
+        String checkLecturerSQL = "SELECT COUNT(*) " +
+                "FROM auto_subjects a " +
+                "JOIN custom_subjects cs ON a.auto_subject_id = cs.auto_subject_id " +
+                "WHERE cs.custom_subject_id = ? AND a.lecturer_id IS NOT NULL";
+        String deleteCustomSQL = "DELETE FROM custom_subjects WHERE custom_subject_id = ?";
+        String deleteAutoSQL = "DELETE FROM auto_subjects WHERE auto_subject_id = (SELECT auto_subject_id FROM custom_subjects WHERE custom_subject_id = ?)";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement checkStatement = connection.prepareStatement(checkLecturerSQL);
+             PreparedStatement deleteCustomStatement = connection.prepareStatement(deleteCustomSQL);
+             PreparedStatement deleteAutoStatement = connection.prepareStatement(deleteAutoSQL)) {
+
+            // Kiểm tra nếu có giảng viên dạy môn học
+            checkStatement.setInt(1, customSubjectID);
+            try (ResultSet resultSet = checkStatement.executeQuery()) {
+                if (resultSet.next() && resultSet.getInt(1) > 0) {
+                    return false; // Không xóa môn học nếu có giảng viên dạy
+                }
             }
 
-            // Xóa từ bảng auto_subjects
-            String deleteAutoSQL = "DELETE FROM auto_subjects WHERE auto_subject_id = ?";
-            try (PreparedStatement deleteAutoStatement = connection.prepareStatement(deleteAutoSQL)) {
-                deleteAutoStatement.setInt(1, subjectID);
-                deleteAutoStatement.executeUpdate();
-            }
+            // Xóa môn học từ bảng custom_subjects trước
+            deleteCustomStatement.setInt(1, customSubjectID);
+            deleteCustomStatement.executeUpdate();
+
+            // Xóa môn học từ bảng auto_subjects
+            deleteAutoStatement.setInt(1, customSubjectID);
+            deleteAutoStatement.executeUpdate();
+
+            return true; // Xóa môn học thành công
+
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 }

@@ -525,8 +525,20 @@ public class UniversityManagementUI extends JFrame {
         });
 
         btnDeleteSubject.addActionListener(e -> {
-            deleteSubject();
-            loadSubjects();
+            int selectedRow = subjectTable.getSelectedRow();
+            if (selectedRow != -1) {
+                int modelRow = subjectTable.convertRowIndexToModel(selectedRow);
+                int customSubjectID = (int) subjectTableModel.getValueAt(modelRow, 0);
+                boolean success = new SubjectDAO().deleteSubject(customSubjectID);
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Subject deleted successfully!");
+                    loadSubjects(); // Làm mới bảng sau khi xóa
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cannot delete the subject as it is currently being taught by a lecturer.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a subject to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         return panel;
