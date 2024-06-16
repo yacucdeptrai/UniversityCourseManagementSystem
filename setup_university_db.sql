@@ -42,11 +42,12 @@ CREATE TABLE IF NOT EXISTS custom_subjects (
     FOREIGN KEY (auto_subject_id) REFERENCES auto_subjects(auto_subject_id) ON DELETE CASCADE
 );
 
+-- Tạo bảng 'Grades'
 CREATE TABLE IF NOT EXISTS grades (
     grade_id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id INT NOT NULL,
-    custom_subject_id INT NOT NULL,
-    score DECIMAL(4, 2) NOT NULL,
+    student_id INT,
+    custom_subject_id INT,
+    score DOUBLE,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (custom_subject_id) REFERENCES custom_subjects(custom_subject_id) ON DELETE CASCADE
 );

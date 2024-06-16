@@ -14,6 +14,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
+import java.util.HashMap;
+import java.util.Map;
 import java.awt.*;
 import java.util.List;
 
@@ -251,43 +253,89 @@ public class UniversityManagementUI extends JFrame {
             int modelRow = studentTable.convertRowIndexToModel(selectedRow);
             int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
 
+            List<Subject> enrolledSubjects = new SubjectDAO().getSubjectsByStudentID(studentID);
             List<Grade> grades = new GradeDAO().getGradesByStudentID(studentID);
-            if (grades.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No academic record available.", "Information", JOptionPane.INFORMATION_MESSAGE);
-                return;
+
+            // Tạo bản đồ để tra cứu điểm dựa trên customSubjectID
+            Map<Integer, Double> gradeMap = new HashMap<>();
+            for (Grade grade : grades) {
+                gradeMap.put(grade.getCustomSubjectID(), grade.getScore());
             }
 
+            // Cấu trúc bảng hiển thị
             JPanel panel = new JPanel(new BorderLayout());
-            DefaultTableModel gradeTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Score", "Status", "Edit"}, 0);
+            DefaultTableModel gradeTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Credits", "Score", "Status"}, 0);
             JTable gradeTable = new JTable(gradeTableModel);
             gradeTable.setRowHeight(25);
             JScrollPane scrollPane = new JScrollPane(gradeTable);
             panel.add(scrollPane, BorderLayout.CENTER);
 
+            // Điền dữ liệu vào bảng
+            double totalCredits = 0;
             double totalScore = 0;
-            for (Grade grade : grades) {
-                Subject subject = new SubjectDAO().getSubjectByCustomID(grade.getCustomSubjectID()); // Sử dụng phương thức mới
-                String subjectName = subject.getSubjectName();
-                double score = grade.getScore();
-                String status = score >= 4 ? "Passed" : "Failed";
+            double totalEarnedCredits = 0;
+            double totalScoreEarned = 0;
 
-                JButton editButton = new JButton("Edit");
-                editButton.addActionListener(e -> editGrade(studentID, subject.getCustomSubjectID(), subjectName));
+            for (Subject subject : enrolledSubjects) {
+                int customSubjectID = subject.getCustomSubjectID();
+                double credits = subject.getCredits();
+                Double score = gradeMap.get(customSubjectID); // Sử dụng map để tra cứu điểm
+                String status = score != null && score >= 4 ? "Passed" : (score != null ? "Failed" : "");
 
-                gradeTableModel.addRow(new Object[]{grade.getGradeID(), subjectName, score, status, editButton});
-                totalScore += score;
+                gradeTableModel.addRow(new Object[]{
+                        customSubjectID,
+                        subject.getSubjectName(),
+                        credits,
+                        score != null ? score : "", // Hiển thị điểm hoặc để trống
+                        status
+                });
+
+                totalCredits += credits;
+                if (score != null) {
+                    totalScore += score;
+                    if (score >= 4) {
+                        totalEarnedCredits += credits;
+                        totalScoreEarned += score * credits;
+                    }
+                }
             }
 
-            double gpa = totalScore / grades.size();
-            String gpaText = String.format("GPA: %.2f / 4.0", gpa);
+            double gpa = totalScore / enrolledSubjects.size();
+            double cumulativeGpa = totalEarnedCredits != 0 ? totalScoreEarned / totalEarnedCredits : 0;
 
-            JLabel lblGpa = new JLabel(gpaText, SwingConstants.CENTER);
-            lblGpa.setFont(new Font("Tahoma", Font.BOLD, 14));
-            panel.add(lblGpa, BorderLayout.SOUTH);
+            String summary = String.format(
+                    "<html>Total Credits: %.2f<br/>" +
+                            "Earned Credits: %.2f<br/>" +
+                            "GPA (10-scale): %.2f<br/>" +
+                            "GPA (4-scale): %.2f<br/>" +
+                            "Cumulative GPA (10-scale): %.2f<br/>" +
+                            "Cumulative GPA (4-scale): %.2f</html>",
+                    totalCredits,
+                    totalEarnedCredits,
+                    gpa,
+                    gpa / 2.5,
+                    cumulativeGpa,
+                    cumulativeGpa / 2.5
+            );
+
+            JLabel lblSummary = new JLabel(summary, SwingConstants.CENTER);
+            lblSummary.setFont(new Font("Tahoma", Font.BOLD, 14));
+            panel.add(lblSummary, BorderLayout.SOUTH);
+
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton btnUpdateGrade = new JButton("Update Grade");
+            JButton btnClose = new JButton("Close");
+
+            btnUpdateGrade.addActionListener(e -> updateGrade(gradeTable, gradeTableModel, studentID));
+            btnClose.addActionListener(e -> ((JDialog) SwingUtilities.getWindowAncestor(panel)).dispose());
+
+            buttonPanel.add(btnUpdateGrade);
+            buttonPanel.add(btnClose);
+            panel.add(buttonPanel, BorderLayout.NORTH);
 
             JDialog dialog = new JDialog(this, "Academic Record", true);
             dialog.getContentPane().add(panel);
-            dialog.setSize(600, 400);
+            dialog.setSize(700, 500);
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
         } else {
@@ -295,17 +343,35 @@ public class UniversityManagementUI extends JFrame {
         }
     }
 
-    private void editGrade(int studentID, int customSubjectID, String subjectName) {
-        String newScoreStr = JOptionPane.showInputDialog(this, "Enter new score for " + subjectName + ":", "Edit Score", JOptionPane.PLAIN_MESSAGE);
-        if (newScoreStr != null && !newScoreStr.isEmpty()) {
-            try {
-                double newScore = Double.parseDouble(newScoreStr);
-                new GradeDAO().updateGrade(studentID, customSubjectID, newScore);
-                JOptionPane.showMessageDialog(this, "Score updated successfully!");
-                displayAcademicRecord(); // Làm mới bảng sau khi cập nhật
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Invalid score entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+    private void updateGrade(JTable gradeTable, DefaultTableModel gradeTableModel, int studentID) {
+        int selectedRow = gradeTable.getSelectedRow();
+        if (selectedRow != -1) {
+            // Lấy customSubjectID và hiện hộp thoại nhập điểm mới
+            int customSubjectID = (int) gradeTableModel.getValueAt(selectedRow, 0);
+            String subjectName = (String) gradeTableModel.getValueAt(selectedRow, 1);
+            String newScoreString = JOptionPane.showInputDialog(this, "Enter new grade for " + subjectName + ":");
+            if (newScoreString != null && !newScoreString.trim().isEmpty()) {
+                try {
+                    double newScore = Double.parseDouble(newScoreString);
+                    if (newScore < 0 || newScore > 10) {
+                        JOptionPane.showMessageDialog(this, "Grade must be between 0 and 10.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Cập nhật điểm trong CSDL
+                    new GradeDAO().updateGrade(studentID, customSubjectID, newScore);
+
+                    // Cập nhật bảng hiển thị
+                    gradeTableModel.setValueAt(newScore, selectedRow, 3);
+                    String status = newScore >= 4 ? "Passed" : "Failed";
+                    gradeTableModel.setValueAt(status, selectedRow, 4);
+                    JOptionPane.showMessageDialog(this, "Grade updated successfully!");
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Invalid grade format.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a subject to update grade.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
