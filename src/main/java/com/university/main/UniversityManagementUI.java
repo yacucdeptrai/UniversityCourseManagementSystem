@@ -397,7 +397,7 @@ public class UniversityManagementUI extends JFrame {
             }
 
             JScrollPane scrollPane = new JScrollPane(table);
-            scrollPane.setPreferredSize(new Dimension(500, 300));
+            scrollPane.setPreferredSize(new Dimension(300, 200));
 
             JButton btnShowStudents = new JButton("Show Students");
             JButton btnClose = new JButton("Close");
@@ -426,7 +426,6 @@ public class UniversityManagementUI extends JFrame {
             buttonPanel.add(btnShowStudents);
             buttonPanel.add(btnClose);
 
-            // Đảm bảo kích thước nút "Close" bằng với nút "Show Students"
             Dimension buttonSize = btnShowStudents.getPreferredSize();
             btnClose.setPreferredSize(buttonSize);
 
@@ -434,7 +433,11 @@ public class UniversityManagementUI extends JFrame {
             panel.add(scrollPane, BorderLayout.CENTER);
             panel.add(buttonPanel, BorderLayout.SOUTH);
 
-            JOptionPane.showMessageDialog(this, panel, "Classes Taught by Lecturer", JOptionPane.PLAIN_MESSAGE);
+            JDialog dialog = new JDialog(this, "Classes Taught by Lecturer", true);
+            dialog.getContentPane().add(panel);
+            dialog.pack();
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Please select a lecturer to view their classes.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -466,7 +469,7 @@ public class UniversityManagementUI extends JFrame {
         }
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(400, 250));
+        scrollPane.setPreferredSize(new Dimension(300, 200));
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(scrollPane, BorderLayout.CENTER);
