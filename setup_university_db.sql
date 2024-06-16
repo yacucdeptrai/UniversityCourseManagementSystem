@@ -60,10 +60,3 @@ CREATE TABLE IF NOT EXISTS enrollments (
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (custom_subject_id) REFERENCES custom_subjects(custom_subject_id) ON DELETE CASCADE
 );
-
--- Xóa dữ liệu cũ (Chỉ sử dụng khi cần làm sạch dữ liệu)
-DELETE FROM enrollments;
-DELETE FROM subjects;
-DELETE FROM students;
-DELETE FROM lecturers;
-DELETE FROM persons;

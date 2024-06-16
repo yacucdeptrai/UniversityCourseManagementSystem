@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class DisplayAcademicRecordDialog extends JDialog {
     private JTable gradeTable;
     private DefaultTableModel gradeTableModel;
+    private JLabel lblSummary;
     private int studentID;
 
     public DisplayAcademicRecordDialog(Frame parent, int studentID) {
@@ -27,16 +28,13 @@ public class DisplayAcademicRecordDialog extends JDialog {
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setSize(500, 500);
+        setSize(600, 400);
         setLocationRelativeTo(getParent());
 
         // Tạo bảng điểm
         gradeTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Credits", "Score", "Status"}, 0);
         gradeTable = new JTable(gradeTableModel);
         gradeTable.setRowHeight(25);
-
-        // Tạo đường viền cho tiêu đề và các ô
-        gradeTable.getTableHeader().setBorder(BorderFactory.createLineBorder(Color.BLACK));
         gradeTable.setGridColor(Color.LIGHT_GRAY);
         gradeTable.setShowGrid(true);
 
@@ -58,8 +56,11 @@ public class DisplayAcademicRecordDialog extends JDialog {
         }
 
         // Panel hiển thị GPA
+        lblSummary = new JLabel("", SwingConstants.LEFT);
+        lblSummary.setFont(new Font("Tahoma", Font.BOLD, 14));
         JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         summaryPanel.setBorder(BorderFactory.createTitledBorder("GPA Summary"));
+        summaryPanel.add(lblSummary);
         add(summaryPanel, BorderLayout.SOUTH);
 
         // Panel chứa các nút
@@ -107,39 +108,31 @@ public class DisplayAcademicRecordDialog extends JDialog {
 
             totalCredits += credits;
             if (score != null) {
-                totalScore += score;
+                totalScore += score * credits;
                 if (score >= 4) {
                     totalEarnedCredits += credits;
-                    totalScoreEarned += score * credits;
+                    totalScoreEarned += credits;
                 }
             }
         }
 
-        double gpa = enrolledSubjects.size() > 0 ? totalScore / enrolledSubjects.size() : 0;
-        double cumulativeGpa = totalEarnedCredits != 0 ? totalScoreEarned / totalEarnedCredits : 0;
+        double gpa = totalCredits > 0 ? totalScore / totalCredits : 0;
+        double gpa4 = gpa / 2.5; // Giả định chuyển đổi thang điểm 10 sang 4 là chia cho 2.5
 
-        JLabel lblSummary = new JLabel(String.format(
-                "<html><b>Total Credits:</b> %.2f<br/>" +
-                        "<b>Earned Credits:</b> %.2f<br/>" +
-                        "<b>GPA (10-scale):</b> %.2f<br/>" +
-                        "<b>GPA (4-scale):</b> %.2f<br/>" +
-                        "<b>Cumulative GPA (10-scale):</b> %.2f<br/>" +
-                        "<b>Cumulative GPA (4-scale):</b> %.2f</html>",
+        lblSummary.setText(String.format(
+                "<html>Total Credits: %.2f<br/>" +
+                        "Earned Credits: %.2f<br/>" +
+                        "GPA (10-scale): %.2f<br/>" +
+                        "GPA (4-scale): %.2f<br/>" +
+                        "Cumulative GPA (10-scale): %.2f<br/>" +
+                        "Cumulative GPA (4-scale): %.2f</html>",
                 totalCredits,
                 totalEarnedCredits,
                 gpa,
-                gpa / 2.5,
-                cumulativeGpa,
-                cumulativeGpa / 2.5
-        ), SwingConstants.LEFT);
-
-        lblSummary.setFont(new Font("Tahoma", Font.BOLD, 14));
-
-        JPanel summaryPanel = (JPanel) getContentPane().getComponent(1);
-        summaryPanel.removeAll();
-        summaryPanel.add(lblSummary);
-        summaryPanel.revalidate();
-        summaryPanel.repaint();
+                gpa4,
+                gpa,
+                gpa4
+        ));
     }
 
     private void updateGrade() {
@@ -148,10 +141,14 @@ public class DisplayAcademicRecordDialog extends JDialog {
             // Lấy customSubjectID và hiện hộp thoại nhập điểm mới
             int customSubjectID = (int) gradeTableModel.getValueAt(selectedRow, 0);
             String subjectName = (String) gradeTableModel.getValueAt(selectedRow, 1);
-            String newScoreString = JOptionPane.showInputDialog(this, "Enter new grade for " + subjectName + ":");
-            if (newScoreString != null && !newScoreString.trim().isEmpty()) {
+            String currentScore = gradeTableModel.getValueAt(selectedRow, 3).toString();
+
+            UpdateGradeDialog dialog = new UpdateGradeDialog(this, subjectName, currentScore);
+            dialog.setVisible(true);
+
+            if (dialog.isConfirmed()) {
                 try {
-                    double newScore = Double.parseDouble(newScoreString);
+                    double newScore = dialog.getGrade();
                     if (newScore < 0 || newScore > 10) {
                         JOptionPane.showMessageDialog(this, "Grade must be between 0 and 10.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;

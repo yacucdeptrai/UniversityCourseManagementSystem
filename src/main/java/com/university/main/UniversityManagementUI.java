@@ -33,7 +33,7 @@ public class UniversityManagementUI extends JFrame {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.add("Student Management", createStudentManagementPanel());
         tabbedPane.add("Lecturer Management", createLecturerManagementPanel());
-        tabbedPane.add("Subject Management", createSubjectManagementPanel());
+        tabbedPane.add("Class Management", createClassManagementPanel());
 
         add(tabbedPane, BorderLayout.CENTER);
 
@@ -510,7 +510,7 @@ public class UniversityManagementUI extends JFrame {
         JOptionPane.showMessageDialog(this, panel, "Students in Class", JOptionPane.PLAIN_MESSAGE);
     }
 
-    private JPanel createSubjectManagementPanel() {
+    private JPanel createClassManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
         subjectTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Lecturer", "Credits"}, 0);
@@ -535,9 +535,9 @@ public class UniversityManagementUI extends JFrame {
         panel.add(searchPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        btnAddSubject = new JButton("Create Subject");
-        btnEditSubject = new JButton("Edit Subject");
-        btnDeleteSubject = new JButton("Delete Subject");
+        btnAddSubject = new JButton("Create Class");
+        btnEditSubject = new JButton("Edit Class");
+        btnDeleteSubject = new JButton("Delete Class");
 
         buttonPanel.add(btnAddSubject);
         buttonPanel.add(btnEditSubject);
