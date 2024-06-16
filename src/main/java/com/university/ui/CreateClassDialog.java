@@ -18,10 +18,15 @@ public class CreateClassDialog extends JDialog {
 
     public CreateClassDialog(Frame parent) {
         super(parent, "Create Class", true);
-        setLayout(new GridLayout(5, 2, 10, 10)); // Tạo bố cục lưới với 5 hàng, 2 cột, khoảng cách giữa các phần tử là 10
-        setSize(300, 200); // Thiết lập kích thước cho cửa sổ
-        setLocationRelativeTo(parent); // Đặt vị trí cửa sổ giữa màn hình
+        initializeUI(parent);
+    }
 
+    private void initializeUI(Frame parent) {
+        setLayout(new GridLayout(5, 2, 10, 10));
+        setSize(300, 200);
+        setLocationRelativeTo(parent);
+
+        // Components
         JLabel lblID = new JLabel("Subject ID:");
         customSubjectIDField = new JTextField();
         add(lblID);
@@ -55,7 +60,7 @@ public class CreateClassDialog extends JDialog {
 
         btnAddSubject = new JButton("Create Class");
         btnAddSubject.addActionListener(e -> addSubject());
-        add(new JLabel()); // Thêm nhãn trống để làm bộ đệm
+        add(new JLabel()); // Buffer
         add(btnAddSubject);
     }
 
@@ -69,7 +74,6 @@ public class CreateClassDialog extends JDialog {
 
             Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
 
-            // Tạo tên môn học duy nhất
             SubjectDAO subjectDAO = new SubjectDAO();
             String uniqueSubjectName = subjectDAO.generateUniqueSubjectName(subjectName);
 

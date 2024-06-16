@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS custom_subjects (
 CREATE TABLE IF NOT EXISTS grades (
     student_id INT,
     custom_subject_id INT,
-    score DECIMAL(3, 2),
+    score DECIMAL(5, 2),
     PRIMARY KEY (student_id, custom_subject_id),
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (custom_subject_id) REFERENCES custom_subjects(custom_subject_id) ON DELETE CASCADE

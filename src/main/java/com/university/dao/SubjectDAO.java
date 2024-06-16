@@ -110,28 +110,25 @@ public class SubjectDAO {
     }
 
     public String generateUniqueSubjectName(String baseName) {
-        String uniqueName = baseName;
-        int count = 1;
-
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            while (true) {
-                String sql = "SELECT COUNT(*) FROM auto_subjects WHERE subject_name = ?";
-                try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                    statement.setString(1, uniqueName);
-                    try (ResultSet resultSet = statement.executeQuery()) {
-                        if (resultSet.next() && resultSet.getInt(1) > 0) {
-                            uniqueName = baseName + " " + count++;
-                        } else {
-                            break;
-                        }
+        String sql = "SELECT subject_name FROM auto_subjects WHERE subject_name LIKE ?";
+        int counter = 1;
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            String candidateName = baseName;
+            statement.setString(1, baseName + "%");
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String existingName = resultSet.getString("subject_name");
+                    if (existingName.equals(candidateName)) {
+                        counter++;
+                        candidateName = baseName + " " + counter;
                     }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return uniqueName;
+        return baseName + (counter > 1 ? " " + counter : "");
     }
 
     // Lấy môn học theo ID sinh viên
