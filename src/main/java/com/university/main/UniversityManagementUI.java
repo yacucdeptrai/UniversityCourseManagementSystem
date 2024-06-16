@@ -270,6 +270,21 @@ public class UniversityManagementUI extends JFrame {
             JScrollPane scrollPane = new JScrollPane(gradeTable);
             panel.add(scrollPane, BorderLayout.CENTER);
 
+            // Định dạng các cột
+            gradeTable.getColumnModel().getColumn(0).setPreferredWidth(50); // ID
+            gradeTable.getColumnModel().getColumn(1).setPreferredWidth(150); // Subject Name
+            gradeTable.getColumnModel().getColumn(2).setPreferredWidth(50); // Credits
+            gradeTable.getColumnModel().getColumn(3).setPreferredWidth(50); // Score
+            gradeTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Status
+
+            // Định dạng header và cell
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+            for (int i = 0; i < gradeTable.getColumnCount(); i++) {
+                gradeTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            }
+            gradeTable.getTableHeader().setDefaultRenderer(centerRenderer);
+
             // Điền dữ liệu vào bảng
             double totalCredits = 0;
             double totalScore = 0;
@@ -304,12 +319,12 @@ public class UniversityManagementUI extends JFrame {
             double cumulativeGpa = totalEarnedCredits != 0 ? totalScoreEarned / totalEarnedCredits : 0;
 
             String summary = String.format(
-                    "<html>Total Credits: %.2f<br/>" +
-                            "Earned Credits: %.2f<br/>" +
-                            "GPA (10-scale): %.2f<br/>" +
-                            "GPA (4-scale): %.2f<br/>" +
-                            "Cumulative GPA (10-scale): %.2f<br/>" +
-                            "Cumulative GPA (4-scale): %.2f</html>",
+                    "<html><b>Total Credits:</b> %.2f<br/>" +
+                            "<b>Earned Credits:</b> %.2f<br/>" +
+                            "<b>GPA (10-scale):</b> %.2f<br/>" +
+                            "<b>GPA (4-scale):</b> %.2f<br/>" +
+                            "<b>Cumulative GPA (10-scale):</b> %.2f<br/>" +
+                            "<b>Cumulative GPA (4-scale):</b> %.2f</html>",
                     totalCredits,
                     totalEarnedCredits,
                     gpa,
@@ -318,9 +333,12 @@ public class UniversityManagementUI extends JFrame {
                     cumulativeGpa / 2.5
             );
 
-            JLabel lblSummary = new JLabel(summary, SwingConstants.CENTER);
+            JPanel summaryPanel = new JPanel();
+            summaryPanel.setBorder(BorderFactory.createTitledBorder("GPA Summary"));
+            JLabel lblSummary = new JLabel(summary, SwingConstants.LEFT);
             lblSummary.setFont(new Font("Tahoma", Font.BOLD, 14));
-            panel.add(lblSummary, BorderLayout.SOUTH);
+            summaryPanel.add(lblSummary);
+            panel.add(summaryPanel, BorderLayout.SOUTH);
 
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             JButton btnUpdateGrade = new JButton("Update Grade");
@@ -335,7 +353,7 @@ public class UniversityManagementUI extends JFrame {
 
             JDialog dialog = new JDialog(this, "Academic Record", true);
             dialog.getContentPane().add(panel);
-            dialog.setSize(700, 500);
+            dialog.setSize(800, 500);
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
         } else {
@@ -366,6 +384,9 @@ public class UniversityManagementUI extends JFrame {
                     String status = newScore >= 4 ? "Passed" : "Failed";
                     gradeTableModel.setValueAt(status, selectedRow, 4);
                     JOptionPane.showMessageDialog(this, "Grade updated successfully!");
+
+                    // Tính lại GPA và cập nhật tổng kết
+                    displayAcademicRecord(); // Gọi lại phương thức để làm mới
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(this, "Invalid grade format.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
