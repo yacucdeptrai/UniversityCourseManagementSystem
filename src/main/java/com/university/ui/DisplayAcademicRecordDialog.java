@@ -27,7 +27,7 @@ public class DisplayAcademicRecordDialog extends JDialog {
 
     private void initializeUI() {
         setLayout(new BorderLayout());
-        setSize(800, 500);
+        setSize(500, 500);
         setLocationRelativeTo(getParent());
 
         // Tạo bảng điểm
@@ -44,11 +44,11 @@ public class DisplayAcademicRecordDialog extends JDialog {
         add(scrollPane, BorderLayout.CENTER);
 
         // Định dạng các cột
-        gradeTable.getColumnModel().getColumn(0).setPreferredWidth(50); // ID
-        gradeTable.getColumnModel().getColumn(1).setPreferredWidth(200); // Subject Name
-        gradeTable.getColumnModel().getColumn(2).setPreferredWidth(50); // Credits
-        gradeTable.getColumnModel().getColumn(3).setPreferredWidth(50); // Score
-        gradeTable.getColumnModel().getColumn(4).setPreferredWidth(100); // Status
+        gradeTable.getColumnModel().getColumn(0).setPreferredWidth(20); // ID
+        gradeTable.getColumnModel().getColumn(1).setPreferredWidth(80); // Subject Name
+        gradeTable.getColumnModel().getColumn(2).setPreferredWidth(30); // Credits
+        gradeTable.getColumnModel().getColumn(3).setPreferredWidth(30); // Score
+        gradeTable.getColumnModel().getColumn(4).setPreferredWidth(50); // Status
 
         // Định dạng header và cell
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
