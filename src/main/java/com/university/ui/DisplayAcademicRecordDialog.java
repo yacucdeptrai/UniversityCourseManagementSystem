@@ -35,6 +35,7 @@ public class DisplayAcademicRecordDialog extends JDialog {
         gradeTable = new JTable(gradeTableModel);
         gradeTable.setRowHeight(25);
 
+        // Tạo đường viền cho tiêu đề và các ô
         gradeTable.getTableHeader().setBorder(BorderFactory.createLineBorder(Color.BLACK));
         gradeTable.setGridColor(Color.LIGHT_GRAY);
         gradeTable.setShowGrid(true);
@@ -133,7 +134,7 @@ public class DisplayAcademicRecordDialog extends JDialog {
         ), SwingConstants.LEFT);
 
         lblSummary.setFont(new Font("Tahoma", Font.BOLD, 14));
-        
+
         JPanel summaryPanel = (JPanel) getContentPane().getComponent(1);
         summaryPanel.removeAll();
         summaryPanel.add(lblSummary);

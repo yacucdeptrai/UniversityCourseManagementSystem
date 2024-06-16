@@ -9,17 +9,17 @@ import java.util.List;
 public class GradeDAO {
     public List<Grade> getGradesByStudentID(int studentID) {
         List<Grade> grades = new ArrayList<>();
-        String sql = "SELECT * FROM grades WHERE student_id = ?";
+        String sql = "SELECT student_id, custom_subject_id, score FROM grades WHERE student_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, studentID);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    Grade grade = new Grade();
-                    grade.setGradeID(resultSet.getInt("grade_id"));
-                    grade.setStudentID(resultSet.getInt("student_id"));
-                    grade.setCustomSubjectID(resultSet.getInt("custom_subject_id"));
-                    grade.setScore(resultSet.getDouble("score"));
+                    Grade grade = new Grade(
+                            resultSet.getInt("student_id"),
+                            resultSet.getInt("custom_subject_id"),
+                            resultSet.getDouble("score")
+                    );
                     grades.add(grade);
                 }
             }
@@ -29,13 +29,14 @@ public class GradeDAO {
         return grades;
     }
 
-    public void updateGrade(int studentID, int customSubjectID, double newScore) {
-        String sql = "UPDATE grades SET score = ? WHERE student_id = ? AND custom_subject_id = ?";
+    public void updateGrade(int studentID, int customSubjectID, double score) {
+        String sql = "INSERT INTO grades (student_id, custom_subject_id, score) VALUES (?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE score = VALUES(score)";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setDouble(1, newScore);
-            statement.setInt(2, studentID);
-            statement.setInt(3, customSubjectID);
+            statement.setInt(1, studentID);
+            statement.setInt(2, customSubjectID);
+            statement.setDouble(3, score);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
