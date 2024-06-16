@@ -101,8 +101,20 @@ public class UniversityManagementUI extends JFrame {
         });
 
         btnDeleteStudent.addActionListener(e -> {
-            deleteStudent();
-            loadStudents(); // Làm mới bảng sau khi xóa
+            int selectedRow = studentTable.getSelectedRow();
+            if (selectedRow != -1) {
+                int modelRow = studentTable.convertRowIndexToModel(selectedRow);
+                int StudentID = (int) studentTableModel.getValueAt(modelRow, 0);
+                boolean success = new StudentDAO().deleteStudent(StudentID);
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Student deleted successfully!");
+                    loadStudents(); // Làm mới bảng sau khi xóa
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cannot delete student as now being attended in one or more classes", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a student to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         btnAssignCourse.addActionListener(e -> {
@@ -548,7 +560,7 @@ public class UniversityManagementUI extends JFrame {
         loadSubjects();
 
         btnAddSubject.addActionListener(e -> {
-            new CreateSubjectDialog(UniversityManagementUI.this).setVisible(true);
+            new CreateClassDialog(UniversityManagementUI.this).setVisible(true);
             loadSubjects(); // Làm mới bảng sau khi thêm
         });
 
@@ -645,11 +657,30 @@ public class UniversityManagementUI extends JFrame {
         if (selectedRow != -1) {
             int modelRow = studentTable.convertRowIndexToModel(selectedRow);
             int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
-            new StudentDAO().deleteStudent(studentID);
-            JOptionPane.showMessageDialog(this, "Student deleted successfully!");
-            loadStudents(); // Refresh after deleting
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete this student?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                boolean isDeleted = new StudentDAO().deleteStudent(studentID);
+                if (isDeleted) {
+                    JOptionPane.showMessageDialog(this,
+                            "Student deleted successfully.",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    loadStudents();
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Cannot delete student because they are enrolled in one or more classes.",
+                            "Delete Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a student to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Please select a student to delete.",
+                    "Delete Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -668,19 +699,6 @@ public class UniversityManagementUI extends JFrame {
         }
     }
 
-    private void deleteLecturer() {
-        int selectedRow = lecturerTable.getSelectedRow();
-        if (selectedRow != -1) {
-            int modelRow = lecturerTable.convertRowIndexToModel(selectedRow);
-            int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
-            new LecturerDAO().deleteLecturer(lecturerID);
-            JOptionPane.showMessageDialog(this, "Lecturer deleted successfully!");
-            loadLecturers();
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select a lecturer to delete.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     private void editSubject() {
         int selectedRow = subjectTable.getSelectedRow();
         if (selectedRow != -1) {
@@ -688,24 +706,10 @@ public class UniversityManagementUI extends JFrame {
             int modelRow = subjectTable.convertRowIndexToModel(selectedRow);
             int customSubjectID = (int) subjectTableModel.getValueAt(modelRow, 0);  // Lấy ID của môn học
             Subject subject = new SubjectDAO().getSubjectByCustomID(customSubjectID);
-            new EditSubjectDialog(this, subject).setVisible(true);
+            new EditClassDialog(this, subject).setVisible(true);
             loadSubjects();  // Làm mới bảng sau khi chỉnh sửa
         } else {
             JOptionPane.showMessageDialog(this, "Please select a subject to edit.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void deleteSubject() {
-        int selectedRow = subjectTable.getSelectedRow();
-        if (selectedRow != -1) {
-            int modelRow = subjectTable.convertRowIndexToModel(selectedRow);
-            int customSubjectID = (int) subjectTableModel.getValueAt(modelRow, 0);
-            new SubjectDAO().deleteSubject(customSubjectID);
-            JOptionPane.showMessageDialog(this, "Subject deleted successfully!");
-            loadSubjects();
-            // throw
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select a subject to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

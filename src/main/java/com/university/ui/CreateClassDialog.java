@@ -9,14 +9,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class CreateSubjectDialog extends JDialog {
+public class CreateClassDialog extends JDialog {
     private JTextField subjectNameField;
     private JTextField creditsField;
     private JTextField customSubjectIDField;
     private JComboBox<String> lecturerComboBox;
     private JButton btnAddSubject;
 
-    public CreateSubjectDialog(Frame parent) {
+    public CreateClassDialog(Frame parent) {
         super(parent, "Create Subject", true);
         setLayout(new GridLayout(5, 2, 10, 10)); // Tạo bố cục lưới với 5 hàng, 2 cột, khoảng cách giữa các phần tử là 10
         setSize(300, 200); // Thiết lập kích thước cho cửa sổ

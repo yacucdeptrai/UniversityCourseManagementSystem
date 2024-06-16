@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class EditSubjectDialog extends JDialog {
+public class EditClassDialog extends JDialog {
     private JTextField subjectNameField;
     private JComboBox<Lecturer> lecturerComboBox;
     private JTextField creditsField;
@@ -19,7 +19,7 @@ public class EditSubjectDialog extends JDialog {
 
     private Subject subject;
 
-    public EditSubjectDialog(Frame parent, Subject subject) {
+    public EditClassDialog(Frame parent, Subject subject) {
         super(parent, "Edit Subject", true);
         this.subject = subject;
         setLayout(new GridLayout(5, 2, 10, 10));

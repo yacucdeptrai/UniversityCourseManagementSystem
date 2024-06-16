@@ -70,14 +70,35 @@ public class StudentDAO {
         }
     }
 
-    public void deleteStudent(int studentID) {
-        String sql = "DELETE FROM students WHERE student_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, studentID);
-            pstmt.executeUpdate();
+    private boolean isStudentEnrolledInAnyClass(int studentID) {
+        String sql = "SELECT COUNT(*) AS count FROM enrollments WHERE student_id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, studentID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("count") > 0;
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean deleteStudent(int studentID) {
+        if (isStudentEnrolledInAnyClass(studentID)) {
+            return false; // Không thể xóa sinh viên đang tham gia lớp học
+        }
+        String sql = "DELETE FROM students WHERE student_id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, studentID);
+            statement.executeUpdate();
+            return true; // Xóa thành công
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Xóa không thành công do lỗi
         }
     }
 
