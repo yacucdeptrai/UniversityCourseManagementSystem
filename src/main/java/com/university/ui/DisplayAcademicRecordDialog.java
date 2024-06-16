@@ -34,6 +34,11 @@ public class DisplayAcademicRecordDialog extends JDialog {
         gradeTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Credits", "Score", "Status"}, 0);
         gradeTable = new JTable(gradeTableModel);
         gradeTable.setRowHeight(25);
+
+        gradeTable.getTableHeader().setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        gradeTable.setGridColor(Color.LIGHT_GRAY);
+        gradeTable.setShowGrid(true);
+
         JScrollPane scrollPane = new JScrollPane(gradeTable);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -50,13 +55,13 @@ public class DisplayAcademicRecordDialog extends JDialog {
         for (int i = 0; i < gradeTable.getColumnCount(); i++) {
             gradeTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
-        gradeTable.getTableHeader().setDefaultRenderer(centerRenderer);
 
         // Panel hiển thị GPA
         JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         summaryPanel.setBorder(BorderFactory.createTitledBorder("GPA Summary"));
         add(summaryPanel, BorderLayout.SOUTH);
 
+        // Panel chứa các nút
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnUpdateGrade = new JButton("Update Grade");
         JButton btnClose = new JButton("Close");
@@ -128,7 +133,7 @@ public class DisplayAcademicRecordDialog extends JDialog {
         ), SwingConstants.LEFT);
 
         lblSummary.setFont(new Font("Tahoma", Font.BOLD, 14));
-
+        
         JPanel summaryPanel = (JPanel) getContentPane().getComponent(1);
         summaryPanel.removeAll();
         summaryPanel.add(lblSummary);
