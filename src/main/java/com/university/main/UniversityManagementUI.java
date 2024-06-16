@@ -27,7 +27,7 @@ public class UniversityManagementUI extends JFrame {
     public UniversityManagementUI() {
         setTitle("University Management System");
         setLayout(new BorderLayout());
-        setSize(650, 600);
+        setSize(685, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JTabbedPane tabbedPane = new JTabbedPane();
