@@ -388,10 +388,21 @@ public class UniversityManagementUI extends JFrame {
             JTable table = new JTable(data, columnNames);
             table.setRowHeight(25);
 
+            // Căn giữa nội dung bảng
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+            for (int i = 0; i < table.getColumnCount(); i++) {
+                table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            }
+
             JScrollPane scrollPane = new JScrollPane(table);
             scrollPane.setPreferredSize(new Dimension(300, 200));
 
-            JOptionPane.showMessageDialog(this, scrollPane, "Classes Taught by Lecturer", JOptionPane.PLAIN_MESSAGE);
+            // Hiển thị bảng trong hộp thoại với nội dung căn giữa
+            JPanel panel = new JPanel(new BorderLayout());
+            panel.add(scrollPane, BorderLayout.CENTER);
+
+            JOptionPane.showMessageDialog(this, panel, "Classes Taught by Lecturer", JOptionPane.PLAIN_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "Please select a lecturer to view their classes.", "Error", JOptionPane.ERROR_MESSAGE);
         }
