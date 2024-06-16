@@ -17,7 +17,7 @@ public class CreateClassDialog extends JDialog {
     private JButton btnAddSubject;
 
     public CreateClassDialog(Frame parent) {
-        super(parent, "Create Subject", true);
+        super(parent, "Create Class", true);
         setLayout(new GridLayout(5, 2, 10, 10)); // Tạo bố cục lưới với 5 hàng, 2 cột, khoảng cách giữa các phần tử là 10
         setSize(300, 200); // Thiết lập kích thước cho cửa sổ
         setLocationRelativeTo(parent); // Đặt vị trí cửa sổ giữa màn hình

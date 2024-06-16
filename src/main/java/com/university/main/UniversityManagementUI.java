@@ -652,38 +652,6 @@ public class UniversityManagementUI extends JFrame {
         }
     }
 
-    private void deleteStudent() {
-        int selectedRow = studentTable.getSelectedRow();
-        if (selectedRow != -1) {
-            int modelRow = studentTable.convertRowIndexToModel(selectedRow);
-            int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
-            int confirm = JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to delete this student?",
-                    "Confirm Delete",
-                    JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                boolean isDeleted = new StudentDAO().deleteStudent(studentID);
-                if (isDeleted) {
-                    JOptionPane.showMessageDialog(this,
-                            "Student deleted successfully.",
-                            "Success",
-                            JOptionPane.INFORMATION_MESSAGE);
-                    loadStudents();
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Cannot delete student because they are enrolled in one or more classes.",
-                            "Delete Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Please select a student to delete.",
-                    "Delete Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     private void editLecturer() {
         int selectedRow = lecturerTable.getSelectedRow();
         if (selectedRow != -1) {
