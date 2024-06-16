@@ -22,8 +22,8 @@ public class EditSubjectDialog extends JDialog {
     public EditSubjectDialog(Frame parent, Subject subject) {
         super(parent, "Edit Subject", true);
         this.subject = subject;
-        setLayout(new GridLayout(5, 2, 5, 5));
-        setSize(350, 180);
+        setLayout(new GridLayout(5, 2, 10, 10));
+        setSize(350, 200);
         setLocationRelativeTo(parent);
 
         add(new JLabel("Subject Name:"));

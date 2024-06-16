@@ -9,20 +9,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class AddSubjectDialog extends JDialog {
+public class CreateSubjectDialog extends JDialog {
     private JTextField subjectNameField;
     private JTextField creditsField;
     private JTextField customSubjectIDField;
     private JComboBox<String> lecturerComboBox;
     private JButton btnAddSubject;
 
-    public AddSubjectDialog(Frame parent) {
-        super(parent, "Add Subject", true);
+    public CreateSubjectDialog(Frame parent) {
+        super(parent, "Create Subject", true);
         setLayout(new GridLayout(5, 2, 10, 10)); // Tạo bố cục lưới với 5 hàng, 2 cột, khoảng cách giữa các phần tử là 10
-        setSize(300, 250); // Thiết lập kích thước cho cửa sổ
+        setSize(300, 200); // Thiết lập kích thước cho cửa sổ
         setLocationRelativeTo(parent); // Đặt vị trí cửa sổ giữa màn hình
 
-        JLabel lblID = new JLabel("Custom Subject ID:");
+        JLabel lblID = new JLabel("Subject ID:");
         customSubjectIDField = new JTextField();
         add(lblID);
         add(customSubjectIDField);
@@ -46,7 +46,7 @@ public class AddSubjectDialog extends JDialog {
         add(lblLecturer);
         add(lecturerComboBox);
 
-        btnAddSubject = new JButton("Add Subject");
+        btnAddSubject = new JButton("Create Subject");
         btnAddSubject.addActionListener(e -> addSubject());
         add(new JLabel()); // Thêm nhãn trống để làm bộ đệm
         add(btnAddSubject);
