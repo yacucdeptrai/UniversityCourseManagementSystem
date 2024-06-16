@@ -1,10 +1,8 @@
 package main.java.com.university.main;
 
-import main.java.com.university.dao.GradeDAO;
 import main.java.com.university.dao.LecturerDAO;
 import main.java.com.university.dao.StudentDAO;
 import main.java.com.university.dao.SubjectDAO;
-import main.java.com.university.model.Grade;
 import main.java.com.university.model.Lecturer;
 import main.java.com.university.model.Student;
 import main.java.com.university.model.Subject;
@@ -14,8 +12,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
-import java.util.HashMap;
-import java.util.Map;
 import java.awt.*;
 import java.util.List;
 

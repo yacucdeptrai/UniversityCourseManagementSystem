@@ -53,11 +53,11 @@ public class DisplayAcademicRecordDialog extends JDialog {
         gradeTable.getTableHeader().setDefaultRenderer(centerRenderer);
 
         // Panel hiển thị GPA
-        JPanel summaryPanel = new JPanel();
+        JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         summaryPanel.setBorder(BorderFactory.createTitledBorder("GPA Summary"));
         add(summaryPanel, BorderLayout.SOUTH);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnUpdateGrade = new JButton("Update Grade");
         JButton btnClose = new JButton("Close");
 
