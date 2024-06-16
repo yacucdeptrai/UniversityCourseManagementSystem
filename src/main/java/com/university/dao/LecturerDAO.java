@@ -103,22 +103,44 @@ public class LecturerDAO {
 
     // Xóa giảng viên
     public boolean deleteLecturer(int lecturerID) {
-        String checkSubjectsSQL = "SELECT COUNT(*) FROM auto_subjects WHERE lecturer_id = ?";
+        String checkStudentEnrollmentsSQL = "SELECT COUNT(*) " +
+                "FROM enrollments e " +
+                "JOIN custom_subjects cs ON e.custom_subject_id = cs.custom_subject_id " +
+                "JOIN auto_subjects a ON cs.auto_subject_id = a.auto_subject_id " +
+                "WHERE a.lecturer_id = ?";
+        String deleteEnrollmentsSQL = "DELETE FROM enrollments WHERE custom_subject_id IN (SELECT custom_subject_id FROM custom_subjects WHERE auto_subject_id IN (SELECT auto_subject_id FROM auto_subjects WHERE lecturer_id = ?))";
+        String deleteCustomSubjectsSQL = "DELETE FROM custom_subjects WHERE auto_subject_id IN (SELECT auto_subject_id FROM auto_subjects WHERE lecturer_id = ?)";
+        String deleteAutoSubjectsSQL = "DELETE FROM auto_subjects WHERE lecturer_id = ?";
         String deleteLecturerSQL = "DELETE FROM lecturers WHERE lecturer_id = ?";
         String deletePersonSQL = "DELETE FROM persons WHERE id = (SELECT person_id FROM lecturers WHERE lecturer_id = ?)";
 
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement checkSubjectsStatement = connection.prepareStatement(checkSubjectsSQL);
+             PreparedStatement checkStudentEnrollmentsStatement = connection.prepareStatement(checkStudentEnrollmentsSQL);
+             PreparedStatement deleteEnrollmentsStatement = connection.prepareStatement(deleteEnrollmentsSQL);
+             PreparedStatement deleteCustomSubjectsStatement = connection.prepareStatement(deleteCustomSubjectsSQL);
+             PreparedStatement deleteAutoSubjectsStatement = connection.prepareStatement(deleteAutoSubjectsSQL);
              PreparedStatement deleteLecturerStatement = connection.prepareStatement(deleteLecturerSQL);
              PreparedStatement deletePersonStatement = connection.prepareStatement(deletePersonSQL)) {
 
-            // Kiểm tra nếu giảng viên đang dạy môn học
-            checkSubjectsStatement.setInt(1, lecturerID);
-            try (ResultSet resultSet = checkSubjectsStatement.executeQuery()) {
+            // Kiểm tra nếu có sinh viên đăng ký môn học của giảng viên
+            checkStudentEnrollmentsStatement.setInt(1, lecturerID);
+            try (ResultSet resultSet = checkStudentEnrollmentsStatement.executeQuery()) {
                 if (resultSet.next() && resultSet.getInt(1) > 0) {
-                    return false; // Không xóa giảng viên nếu đang dạy môn học
+                    return false; // Không xóa giảng viên nếu có sinh viên đăng ký môn học của giảng viên
                 }
             }
+
+            // Xóa các đăng ký môn học liên quan từ bảng enrollments
+            deleteEnrollmentsStatement.setInt(1, lecturerID);
+            deleteEnrollmentsStatement.executeUpdate();
+
+            // Xóa các môn học liên quan từ bảng custom_subjects
+            deleteCustomSubjectsStatement.setInt(1, lecturerID);
+            deleteCustomSubjectsStatement.executeUpdate();
+
+            // Xóa các môn học liên quan từ bảng auto_subjects
+            deleteAutoSubjectsStatement.setInt(1, lecturerID);
+            deleteAutoSubjectsStatement.executeUpdate();
 
             // Xóa giảng viên từ bảng lecturers
             deleteLecturerStatement.setInt(1, lecturerID);
