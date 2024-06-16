@@ -41,38 +41,37 @@ public class SubjectDAO {
     }
 
     public Subject getSubjectByCustomID(int customSubjectID) {
-        String sql = "SELECT cs.custom_subject_id, a.auto_subject_id, a.subject_name, a.credits, " +
-                "l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
+        Subject subject = null;
+        String sql = "SELECT a.auto_subject_id, cs.custom_subject_id, a.subject_name, a.credits, l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
                 "FROM custom_subjects cs " +
                 "JOIN auto_subjects a ON cs.auto_subject_id = a.auto_subject_id " +
                 "JOIN lecturers l ON a.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id " +
                 "WHERE cs.custom_subject_id = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, customSubjectID);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    Subject subject = new Subject();
-                    subject.setCustomSubjectID(resultSet.getInt("custom_subject_id"));
-                    subject.setAutoSubjectID(resultSet.getInt("auto_subject_id"));
-                    subject.setSubjectName(resultSet.getString("subject_name"));
-                    subject.setCredits(resultSet.getInt("credits"));
-
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, customSubjectID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
                     Lecturer lecturer = new Lecturer(
-                            resultSet.getString("lecturer_name"),
-                            resultSet.getDate("date_of_birth").toLocalDate(),
-                            resultSet.getString("gender"),
-                            resultSet.getInt("lecturer_id")
+                            rs.getString("lecturer_name"),
+                            rs.getDate("date_of_birth").toLocalDate(),
+                            rs.getString("gender"),
+                            rs.getInt("lecturer_id")
                     );
-                    subject.setLecturer(lecturer);
-                    return subject;
+                    subject = new Subject(
+                            rs.getInt("custom_subject_id"),
+                            rs.getInt("auto_subject_id"),
+                            rs.getString("subject_name"),
+                            rs.getInt("credits"),
+                            lecturer
+                    );
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return subject;
     }
 
     public Subject getSubjectByName(String subjectName) {

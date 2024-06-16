@@ -1,8 +1,10 @@
 package main.java.com.university.main;
 
+import main.java.com.university.dao.GradeDAO;
 import main.java.com.university.dao.LecturerDAO;
 import main.java.com.university.dao.StudentDAO;
 import main.java.com.university.dao.SubjectDAO;
+import main.java.com.university.model.Grade;
 import main.java.com.university.model.Lecturer;
 import main.java.com.university.model.Student;
 import main.java.com.university.model.Subject;
@@ -128,9 +130,15 @@ public class UniversityManagementUI extends JFrame {
         lblStudentInfo = new JLabel();
         lblStudentInfo.setVerticalAlignment(SwingConstants.TOP); // Đảm bảo văn bản bắt đầu từ đỉnh
         lblStudentInfo.setFont(new Font("Tahoma", Font.PLAIN, 14)); // Đặt phông chữ cho nhãn
-
         infoPanel.add(lblStudentInfo);
         panel.add(infoPanel, BorderLayout.CENTER);
+
+        // Tạo JPanel con để chứa các nút
+        JPanel buttonPanel = new JPanel(new GridLayout(2,1,5,5));
+
+        JButton btnDisplayAcademicRecord = new JButton("Display Academic Record");
+        btnDisplayAcademicRecord.addActionListener(e -> displayAcademicRecord());
+        buttonPanel.add(btnDisplayAcademicRecord);
 
         btnEditStudent = new JButton("Edit Student");
         panel.add(btnEditStudent, BorderLayout.SOUTH);
@@ -139,6 +147,9 @@ public class UniversityManagementUI extends JFrame {
             editStudent();
             loadStudents();
         });
+        buttonPanel.add(btnEditStudent);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH); // Thêm JPanel con vào phía nam của BorderLayout
 
         return panel;
     }
@@ -231,6 +242,70 @@ public class UniversityManagementUI extends JFrame {
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please select a student to assign a course.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void displayAcademicRecord() {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow != -1) {
+            int modelRow = studentTable.convertRowIndexToModel(selectedRow);
+            int studentID = (int) studentTableModel.getValueAt(modelRow, 0);
+
+            List<Grade> grades = new GradeDAO().getGradesByStudentID(studentID);
+            if (grades.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No academic record available.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            JPanel panel = new JPanel(new BorderLayout());
+            DefaultTableModel gradeTableModel = new DefaultTableModel(new String[]{"ID", "Subject Name", "Score", "Status", "Edit"}, 0);
+            JTable gradeTable = new JTable(gradeTableModel);
+            gradeTable.setRowHeight(25);
+            JScrollPane scrollPane = new JScrollPane(gradeTable);
+            panel.add(scrollPane, BorderLayout.CENTER);
+
+            double totalScore = 0;
+            for (Grade grade : grades) {
+                Subject subject = new SubjectDAO().getSubjectByCustomID(grade.getCustomSubjectID()); // Sử dụng phương thức mới
+                String subjectName = subject.getSubjectName();
+                double score = grade.getScore();
+                String status = score >= 4 ? "Passed" : "Failed";
+
+                JButton editButton = new JButton("Edit");
+                editButton.addActionListener(e -> editGrade(studentID, subject.getCustomSubjectID(), subjectName));
+
+                gradeTableModel.addRow(new Object[]{grade.getGradeID(), subjectName, score, status, editButton});
+                totalScore += score;
+            }
+
+            double gpa = totalScore / grades.size();
+            String gpaText = String.format("GPA: %.2f / 4.0", gpa);
+
+            JLabel lblGpa = new JLabel(gpaText, SwingConstants.CENTER);
+            lblGpa.setFont(new Font("Tahoma", Font.BOLD, 14));
+            panel.add(lblGpa, BorderLayout.SOUTH);
+
+            JDialog dialog = new JDialog(this, "Academic Record", true);
+            dialog.getContentPane().add(panel);
+            dialog.setSize(600, 400);
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a student.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void editGrade(int studentID, int customSubjectID, String subjectName) {
+        String newScoreStr = JOptionPane.showInputDialog(this, "Enter new score for " + subjectName + ":", "Edit Score", JOptionPane.PLAIN_MESSAGE);
+        if (newScoreStr != null && !newScoreStr.isEmpty()) {
+            try {
+                double newScore = Double.parseDouble(newScoreStr);
+                new GradeDAO().updateGrade(studentID, customSubjectID, newScore);
+                JOptionPane.showMessageDialog(this, "Score updated successfully!");
+                displayAcademicRecord(); // Làm mới bảng sau khi cập nhật
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Invalid score entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
