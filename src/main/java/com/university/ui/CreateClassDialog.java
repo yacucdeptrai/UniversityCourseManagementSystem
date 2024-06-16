@@ -23,7 +23,7 @@ public class CreateClassDialog extends JDialog {
 
     private void initializeUI(Frame parent) {
         setLayout(new GridLayout(5, 2, 10, 10));
-        setSize(300, 200);
+        setSize(330, 200);
         setLocationRelativeTo(parent);
 
         // Components
