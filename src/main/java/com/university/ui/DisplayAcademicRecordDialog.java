@@ -88,7 +88,6 @@ public class DisplayAcademicRecordDialog extends JDialog {
         double totalCredits = 0;
         double totalScore = 0;
         double totalEarnedCredits = 0;
-        double totalScoreEarned = 0;
 
         gradeTableModel.setRowCount(0); // Xóa tất cả các dòng hiện có
 
@@ -111,7 +110,6 @@ public class DisplayAcademicRecordDialog extends JDialog {
                 totalScore += score * credits;
                 if (score >= 4) {
                     totalEarnedCredits += credits;
-                    totalScoreEarned += credits;
                 }
             }
         }

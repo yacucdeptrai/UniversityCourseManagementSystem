@@ -2,15 +2,17 @@ package main.java.com.university.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class UpdateGradeDialog extends JDialog {
     private JTextField gradeField;
     private boolean confirmed = false;
 
-    public UpdateGradeDialog(DisplayAcademicRecordDialog parent, String subjectName, String currentGrade) {
+    public UpdateGradeDialog(JDialog parent, String subjectName, String currentGrade) {
         super(parent, "Update Grade", true);
         setLayout(new BorderLayout());
-        setSize(300, 150);
+        setSize(200, 130);
         setLocationRelativeTo(parent);
 
         JLabel lblMessage = new JLabel("Enter new grade for " + subjectName + ":");
@@ -22,7 +24,7 @@ public class UpdateGradeDialog extends JDialog {
         inputPanel.add(gradeField);
         add(inputPanel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton btnOk = new JButton("OK");
         JButton btnCancel = new JButton("Cancel");
 
