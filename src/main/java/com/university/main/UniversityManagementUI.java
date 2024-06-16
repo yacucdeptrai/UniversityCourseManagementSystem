@@ -364,11 +364,9 @@ public class UniversityManagementUI extends JFrame {
     private void displayTeachingClasses() {
         int selectedRow = lecturerTable.getSelectedRow();
         if (selectedRow != -1) {
-            // Chuyển đổi chỉ số hàng trong bảng sang chỉ số mô hình thực tế
             int modelRow = lecturerTable.convertRowIndexToModel(selectedRow);
             int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
 
-            // Lấy danh sách các môn học giảng viên đang dạy
             List<Subject> subjects = new SubjectDAO().getSubjectsByLecturerID(lecturerID);
 
             if (subjects.isEmpty()) {
@@ -376,7 +374,6 @@ public class UniversityManagementUI extends JFrame {
                 return;
             }
 
-            // Chuyển danh sách môn học thành mảng String để hiển thị trong bảng
             String[] columnNames = {"ID", "Subject Name", "Credits"};
             Object[][] data = new Object[subjects.size()][3];
             for (int i = 0; i < subjects.size(); i++) {
@@ -385,10 +382,10 @@ public class UniversityManagementUI extends JFrame {
                 data[i][2] = subjects.get(i).getCredits();
             }
 
-            JTable table = new JTable(data, columnNames);
+            DefaultTableModel model = new DefaultTableModel(data, columnNames);
+            JTable table = new JTable(model);
             table.setRowHeight(25);
 
-            // Căn giữa nội dung bảng
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
             centerRenderer.setHorizontalAlignment(JLabel.CENTER);
             for (int i = 0; i < table.getColumnCount(); i++) {
@@ -396,16 +393,61 @@ public class UniversityManagementUI extends JFrame {
             }
 
             JScrollPane scrollPane = new JScrollPane(table);
-            scrollPane.setPreferredSize(new Dimension(300, 200));
+            scrollPane.setPreferredSize(new Dimension(500, 300));
 
-            // Hiển thị bảng trong hộp thoại với nội dung căn giữa
+            JButton btnShowStudents = new JButton("Show Students");
+            btnShowStudents.addActionListener(e -> {
+                int selectedSubjectRow = table.getSelectedRow();
+                if (selectedSubjectRow != -1) {
+                    int modelSubjectRow = table.convertRowIndexToModel(selectedSubjectRow);
+                    int customSubjectID = (int) model.getValueAt(modelSubjectRow, 0);
+                    displayStudentsInClass(customSubjectID);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Please select a class to view students.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+
             JPanel panel = new JPanel(new BorderLayout());
             panel.add(scrollPane, BorderLayout.CENTER);
+            panel.add(btnShowStudents, BorderLayout.SOUTH);
 
             JOptionPane.showMessageDialog(this, panel, "Classes Taught by Lecturer", JOptionPane.PLAIN_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "Please select a lecturer to view their classes.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void displayStudentsInClass(int customSubjectID) {
+        List<Student> students = new StudentDAO().getStudentsBySubjectID(customSubjectID);
+
+        if (students.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No students found for this class.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String[] columnNames = {"ID", "Name"};
+        Object[][] data = new Object[students.size()][2];
+        for (int i = 0; i < students.size(); i++) {
+            data[i][0] = students.get(i).getStudentID();
+            data[i][1] = students.get(i).getName();
+        }
+
+        JTable table = new JTable(data, columnNames);
+        table.setRowHeight(25);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(400, 250));
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JOptionPane.showMessageDialog(this, panel, "Students in Class", JOptionPane.PLAIN_MESSAGE);
     }
 
     private JPanel createSubjectManagementPanel() {
