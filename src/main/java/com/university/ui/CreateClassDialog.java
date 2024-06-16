@@ -40,6 +40,14 @@ public class CreateClassDialog extends JDialog {
         JLabel lblLecturer = new JLabel("Lecturer:");
         lecturerComboBox = new JComboBox<>();
         List<Lecturer> lecturers = new LecturerDAO().getAllLecturers();
+
+        // Kiểm tra xem có giảng viên nào không
+        if (lecturers.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No lecturers available. Please add lecturers before creating a class.", "Error", JOptionPane.ERROR_MESSAGE);
+            dispose(); // Đóng hộp thoại nếu không có giảng viên
+            return;
+        }
+
         for (Lecturer lecturer : lecturers) {
             lecturerComboBox.addItem(lecturer.getName() + " (ID: " + lecturer.getLecturerID() + ")");
         }
@@ -68,6 +76,8 @@ public class CreateClassDialog extends JDialog {
             dispose(); // Đóng cửa sổ
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Invalid input. Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE); // Hiển thị thông báo lỗi nếu đầu vào không hợp lệ
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "An error occurred while adding the subject. Please try again.", "Error", JOptionPane.ERROR_MESSAGE); // Hiển thị thông báo lỗi chung
         }
     }
 }
