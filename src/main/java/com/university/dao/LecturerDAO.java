@@ -102,23 +102,37 @@ public class LecturerDAO {
     }
 
     // Xóa giảng viên
-    public void deleteLecturer(int lecturerID) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            // Xóa tất cả các môn học liên quan trước
-            String deleteSubjectsSQL = "DELETE FROM auto_subjects WHERE lecturer_id = ?";
-            try (PreparedStatement deleteSubjectsStatement = connection.prepareStatement(deleteSubjectsSQL)) {
-                deleteSubjectsStatement.setInt(1, lecturerID);
-                deleteSubjectsStatement.executeUpdate();
+    public boolean deleteLecturer(int lecturerID) {
+        String checkSubjectsSQL = "SELECT COUNT(*) FROM auto_subjects WHERE lecturer_id = ?";
+        String deleteLecturerSQL = "DELETE FROM lecturers WHERE lecturer_id = ?";
+        String deletePersonSQL = "DELETE FROM persons WHERE id = (SELECT person_id FROM lecturers WHERE lecturer_id = ?)";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement checkSubjectsStatement = connection.prepareStatement(checkSubjectsSQL);
+             PreparedStatement deleteLecturerStatement = connection.prepareStatement(deleteLecturerSQL);
+             PreparedStatement deletePersonStatement = connection.prepareStatement(deletePersonSQL)) {
+
+            // Kiểm tra nếu giảng viên đang dạy môn học
+            checkSubjectsStatement.setInt(1, lecturerID);
+            try (ResultSet resultSet = checkSubjectsStatement.executeQuery()) {
+                if (resultSet.next() && resultSet.getInt(1) > 0) {
+                    return false; // Không xóa giảng viên nếu đang dạy môn học
+                }
             }
 
-            // Xóa giảng viên
-            String deleteLecturerSQL = "DELETE FROM lecturers WHERE lecturer_id = ?";
-            try (PreparedStatement deleteLecturerStatement = connection.prepareStatement(deleteLecturerSQL)) {
-                deleteLecturerStatement.setInt(1, lecturerID);
-                deleteLecturerStatement.executeUpdate();
-            }
+            // Xóa giảng viên từ bảng lecturers
+            deleteLecturerStatement.setInt(1, lecturerID);
+            deleteLecturerStatement.executeUpdate();
+
+            // Xóa thông tin cá nhân của giảng viên từ bảng persons
+            deletePersonStatement.setInt(1, lecturerID);
+            deletePersonStatement.executeUpdate();
+
+            return true; // Xóa giảng viên thành công
+
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 }

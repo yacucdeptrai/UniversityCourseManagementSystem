@@ -290,8 +290,20 @@ public class UniversityManagementUI extends JFrame {
         });
 
         btnDeleteLecturer.addActionListener(e -> {
-            deleteLecturer();
-            loadLecturers(); // Làm mới bảng sau khi xóa
+            int selectedRow = lecturerTable.getSelectedRow();
+            if (selectedRow != -1) {
+                int modelRow = lecturerTable.convertRowIndexToModel(selectedRow);
+                int lecturerID = (int) lecturerTableModel.getValueAt(modelRow, 0);
+                boolean success = new LecturerDAO().deleteLecturer(lecturerID);
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Lecturer deleted successfully!");
+                    loadLecturers(); // Làm mới bảng sau khi xóa
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cannot delete the lecturer as they are currently teaching subjects.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a lecturer to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         lecturerTable.getSelectionModel().addListSelectionListener(event -> {
