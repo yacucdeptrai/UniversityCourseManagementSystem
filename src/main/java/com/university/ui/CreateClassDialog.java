@@ -41,10 +41,9 @@ public class CreateClassDialog extends JDialog {
         lecturerComboBox = new JComboBox<>();
         List<Lecturer> lecturers = new LecturerDAO().getAllLecturers();
 
-        // Kiểm tra xem có giảng viên nào không
         if (lecturers.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No lecturers available. Please add lecturers before creating a class.", "Error", JOptionPane.ERROR_MESSAGE);
-            dispose(); // Đóng hộp thoại nếu không có giảng viên
+            dispose();
             return;
         }
 
@@ -54,7 +53,7 @@ public class CreateClassDialog extends JDialog {
         add(lblLecturer);
         add(lecturerComboBox);
 
-        btnAddSubject = new JButton("Create Subject");
+        btnAddSubject = new JButton("Create Class");
         btnAddSubject.addActionListener(e -> addSubject());
         add(new JLabel()); // Thêm nhãn trống để làm bộ đệm
         add(btnAddSubject);
@@ -62,22 +61,27 @@ public class CreateClassDialog extends JDialog {
 
     private void addSubject() {
         try {
-            int customSubjectID = Integer.parseInt(customSubjectIDField.getText()); // Lấy ID tự nhập từ trường văn bản
-            String subjectName = subjectNameField.getText(); // Lấy tên môn học
-            int credits = Integer.parseInt(creditsField.getText()); // Lấy số tín chỉ
-            String lecturerInfo = (String) lecturerComboBox.getSelectedItem(); // Lấy thông tin giảng viên từ hộp chọn
-            int lecturerID = Integer.parseInt(lecturerInfo.substring(lecturerInfo.indexOf("ID: ") + 4, lecturerInfo.indexOf(")"))); // Trích xuất ID giảng viên từ chuỗi thông tin giảng viên
+            int customSubjectID = Integer.parseInt(customSubjectIDField.getText());
+            String subjectName = subjectNameField.getText();
+            int credits = Integer.parseInt(creditsField.getText());
+            String lecturerInfo = (String) lecturerComboBox.getSelectedItem();
+            int lecturerID = Integer.parseInt(lecturerInfo.substring(lecturerInfo.indexOf("ID: ") + 4, lecturerInfo.indexOf(")")));
 
-            Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID); // Lấy đối tượng giảng viên từ ID
-            Subject subject = new Subject(customSubjectID, 0, subjectName, credits, lecturer); // Tạo đối tượng môn học với ID tự nhập và các thông tin khác
-            new SubjectDAO().saveSubject(subject); // Lưu đối tượng môn học vào cơ sở dữ liệu
+            Lecturer lecturer = new LecturerDAO().getLecturerById(lecturerID);
 
-            JOptionPane.showMessageDialog(this, "Subject added successfully!"); // Hiển thị thông báo thành công
-            dispose(); // Đóng cửa sổ
+            // Tạo tên môn học duy nhất
+            SubjectDAO subjectDAO = new SubjectDAO();
+            String uniqueSubjectName = subjectDAO.generateUniqueSubjectName(subjectName);
+
+            Subject subject = new Subject(customSubjectID, 0, uniqueSubjectName, credits, lecturer);
+            subjectDAO.saveSubject(subject);
+
+            JOptionPane.showMessageDialog(this, "Subject added successfully!");
+            dispose();
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid input. Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE); // Hiển thị thông báo lỗi nếu đầu vào không hợp lệ
+            JOptionPane.showMessageDialog(this, "Invalid input. Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "An error occurred while adding the subject. Please try again.", "Error", JOptionPane.ERROR_MESSAGE); // Hiển thị thông báo lỗi chung
+            JOptionPane.showMessageDialog(this, "An error occurred while adding the subject. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

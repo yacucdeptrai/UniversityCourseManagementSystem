@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS grades (
     score DECIMAL(3, 2),
     PRIMARY KEY (student_id, custom_subject_id),
     FOREIGN KEY (student_id) REFERENCES students(student_id),
-    FOREIGN KEY (custom_subject_id) REFERENCES custom_subjects(custom_subject_id)
+    FOREIGN KEY (custom_subject_id) REFERENCES custom_subjects(custom_subject_id) ON DELETE CASCADE
 );
 
 -- Tạo bảng 'enrollments'

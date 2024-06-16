@@ -41,37 +41,38 @@ public class SubjectDAO {
     }
 
     public Subject getSubjectByCustomID(int customSubjectID) {
-        Subject subject = null;
-        String sql = "SELECT a.auto_subject_id, cs.custom_subject_id, a.subject_name, a.credits, l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
+        String sql = "SELECT cs.custom_subject_id, a.auto_subject_id, a.subject_name, a.credits, " +
+                "l.lecturer_id, p.name AS lecturer_name, p.date_of_birth, p.gender " +
                 "FROM custom_subjects cs " +
                 "JOIN auto_subjects a ON cs.auto_subject_id = a.auto_subject_id " +
                 "JOIN lecturers l ON a.lecturer_id = l.lecturer_id " +
                 "JOIN persons p ON l.person_id = p.id " +
                 "WHERE cs.custom_subject_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, customSubjectID);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, customSubjectID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Subject subject = new Subject();
+                    subject.setCustomSubjectID(resultSet.getInt("custom_subject_id"));
+                    subject.setAutoSubjectID(resultSet.getInt("auto_subject_id"));
+                    subject.setSubjectName(resultSet.getString("subject_name"));
+                    subject.setCredits(resultSet.getInt("credits"));
+
                     Lecturer lecturer = new Lecturer(
-                            rs.getString("lecturer_name"),
-                            rs.getDate("date_of_birth").toLocalDate(),
-                            rs.getString("gender"),
-                            rs.getInt("lecturer_id")
+                            resultSet.getString("lecturer_name"),
+                            resultSet.getDate("date_of_birth").toLocalDate(),
+                            resultSet.getString("gender"),
+                            resultSet.getInt("lecturer_id")
                     );
-                    subject = new Subject(
-                            rs.getInt("custom_subject_id"),
-                            rs.getInt("auto_subject_id"),
-                            rs.getString("subject_name"),
-                            rs.getInt("credits"),
-                            lecturer
-                    );
+                    subject.setLecturer(lecturer);
+                    return subject;
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return subject;
+        return null;
     }
 
     public Subject getSubjectByName(String subjectName) {
@@ -106,6 +107,31 @@ public class SubjectDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String generateUniqueSubjectName(String baseName) {
+        String uniqueName = baseName;
+        int count = 1;
+
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            while (true) {
+                String sql = "SELECT COUNT(*) FROM auto_subjects WHERE subject_name = ?";
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    statement.setString(1, uniqueName);
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (resultSet.next() && resultSet.getInt(1) > 0) {
+                            uniqueName = baseName + " " + count++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return uniqueName;
     }
 
     // Lấy môn học theo ID sinh viên
