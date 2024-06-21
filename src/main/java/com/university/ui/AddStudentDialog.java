@@ -25,6 +25,11 @@ public class AddStudentDialog extends JDialog {
         setSize(300, 200);
         setLocationRelativeTo(parent);
 
+        JLabel lblStudentId = new JLabel("Student ID:");
+        studentIdField = new JTextField();
+        add(lblStudentId);
+        add(studentIdField);
+
         JLabel lblName = new JLabel("Name:");
         nameField = new JTextField();
         add(lblName);
@@ -40,11 +45,6 @@ public class AddStudentDialog extends JDialog {
         genderComboBox = new JComboBox<>(new String[]{"Male", "Female"});
         add(lblGender);
         add(genderComboBox);
-
-        JLabel lblStudentId = new JLabel("Student ID:");
-        studentIdField = new JTextField();
-        add(lblStudentId);
-        add(studentIdField);
 
         btnAddStudent = new JButton("Add Student");
         btnAddStudent.addActionListener(new ActionListener() {

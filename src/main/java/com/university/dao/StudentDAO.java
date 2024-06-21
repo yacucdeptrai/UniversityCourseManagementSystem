@@ -36,7 +36,7 @@ public class StudentDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement personStmt = conn.prepareStatement(personSql, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement studentStmt = conn.prepareStatement(studentSql)) {
-            // Them vao bang persons
+            // Thêm vào bảng persons
             personStmt.setString(1, student.getName());
             personStmt.setDate(2, Date.valueOf(student.getDateOfBirth()));
             personStmt.setString(3, student.getGender());
@@ -44,7 +44,7 @@ public class StudentDAO {
             try (ResultSet generatedKeys = personStmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int personID = generatedKeys.getInt(1);
-                    // Them vao bang sinh vien
+                    // Thêm vào bảng sinh viên
                     studentStmt.setInt(1, student.getStudentID());
                     studentStmt.setInt(2, personID);
                     studentStmt.executeUpdate();
@@ -152,16 +152,39 @@ public class StudentDAO {
         return students;
     }
 
-    public void assignCourseToStudent(int studentID, int customSubjectID) {
+    public boolean assignCourseToStudent(int studentID, int customSubjectID) {
+        if (isStudentAlreadyEnrolled(studentID, customSubjectID)) {
+            return false; // Không thực hiện chèn nếu sinh viên đã đăng ký môn học
+        }
+
         String sql = "INSERT INTO enrollments (student_id, custom_subject_id) VALUES (?, ?)";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, studentID);
             statement.setInt(2, customSubjectID);
             statement.executeUpdate();
+            return true; // Đăng ký thành công
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Đăng ký không thành công do lỗi
+        }
+    }
+
+    private boolean isStudentAlreadyEnrolled(int studentID, int customSubjectID) {
+        String sql = "SELECT COUNT(*) AS count FROM enrollments WHERE student_id = ? AND custom_subject_id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, studentID);
+            statement.setInt(2, customSubjectID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("count") > 0;
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     public void removeCourseFromStudent(int studentID, int customSubjectID) {

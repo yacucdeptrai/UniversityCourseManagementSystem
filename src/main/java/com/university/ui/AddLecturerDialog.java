@@ -25,6 +25,11 @@ public class AddLecturerDialog extends JDialog {
         setSize(300, 200);
         setLocationRelativeTo(parent);
 
+        JLabel lblLecturerId = new JLabel("Lecturer ID:");
+        lecturerIdField = new JTextField();
+        add(lblLecturerId);
+        add(lecturerIdField);
+
         JLabel lblName = new JLabel("Name:");
         nameField = new JTextField();
         add(lblName);
@@ -40,11 +45,6 @@ public class AddLecturerDialog extends JDialog {
         genderComboBox = new JComboBox<>(new String[]{"Male", "Female"});
         add(lblGender);
         add(genderComboBox);
-
-        JLabel lblLecturerId = new JLabel("Lecturer ID:");
-        lecturerIdField = new JTextField();
-        add(lblLecturerId);
-        add(lecturerIdField);
 
         btnAddLecturer = new JButton("Add Lecturer");
         btnAddLecturer.addActionListener(new ActionListener() {
