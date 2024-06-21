@@ -54,36 +54,51 @@ public class LecturerDAO {
         return null;
     }
 
-    public void saveLecturer(Lecturer lecturer) {
+    public boolean saveLecturer(Lecturer lecturer) {
+        if (isLecturerIDExists(lecturer.getLecturerID())) {
+            return false; // ID đã tồn tại, không thêm giảng viên mới
+        }
+
         String personSql = "INSERT INTO persons (name, date_of_birth, gender) VALUES (?, ?, ?)";
         String lecturerSql = "INSERT INTO lecturers (lecturer_id, person_id) VALUES (?, ?)";
-
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement personStmt = conn.prepareStatement(personSql, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement lecturerStmt = conn.prepareStatement(lecturerSql)) {
-
-            conn.setAutoCommit(false);
-
-            // Lưu thông tin vào bảng persons
+            // Thêm vào bảng persons
             personStmt.setString(1, lecturer.getName());
             personStmt.setDate(2, Date.valueOf(lecturer.getDateOfBirth()));
             personStmt.setString(3, lecturer.getGender());
             personStmt.executeUpdate();
-
-            ResultSet rs = personStmt.getGeneratedKeys();
-            if (rs.next()) {
-                int personID = rs.getInt(1);
-
-                // Lưu thông tin vào bảng lecturers
-                lecturerStmt.setInt(1, lecturer.getLecturerID());
-                lecturerStmt.setInt(2, personID);
-                lecturerStmt.executeUpdate();
+            try (ResultSet generatedKeys = personStmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int personID = generatedKeys.getInt(1);
+                    // Thêm vào bảng giảng viên
+                    lecturerStmt.setInt(1, lecturer.getLecturerID());
+                    lecturerStmt.setInt(2, personID);
+                    lecturerStmt.executeUpdate();
+                    return true; // Thêm giảng viên thành công
+                }
             }
-
-            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false; // Thêm giảng viên không thành công do lỗi
+    }
+
+    public boolean isLecturerIDExists(int lecturerID) {
+        String sql = "SELECT COUNT(*) FROM lecturers WHERE lecturer_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, lecturerID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void updateLecturer(Lecturer lecturer) {

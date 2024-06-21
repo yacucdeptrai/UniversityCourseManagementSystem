@@ -62,10 +62,25 @@ public class AddLecturerDialog extends JDialog {
         Date selectedDate = dateChooser.getDate();
         LocalDate dateOfBirth = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         String gender = (String) genderComboBox.getSelectedItem();
-        int lecturerId = Integer.parseInt(lecturerIdField.getText());
+        int lecturerId;
+
+        try {
+            lecturerId = Integer.parseInt(lecturerIdField.getText());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Invalid lecturer ID. Please enter a number.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        LecturerDAO lecturerDAO = new LecturerDAO();
+
+        // Kiểm tra ID giảng viên đã tồn tại
+        if (lecturerDAO.isLecturerIDExists(lecturerId)) {
+            JOptionPane.showMessageDialog(this, "Lecturer ID already exists. Please use a different ID.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         Lecturer lecturer = new Lecturer(name, dateOfBirth, gender, lecturerId);
-        new LecturerDAO().saveLecturer(lecturer);
+        lecturerDAO.saveLecturer(lecturer);
 
         JOptionPane.showMessageDialog(this, "Lecturer added successfully!");
         dispose();
