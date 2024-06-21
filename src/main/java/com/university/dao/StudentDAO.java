@@ -36,7 +36,7 @@ public class StudentDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement personStmt = conn.prepareStatement(personSql, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement studentStmt = conn.prepareStatement(studentSql)) {
-            // Insert into persons table
+            // Them vao bang persons
             personStmt.setString(1, student.getName());
             personStmt.setDate(2, Date.valueOf(student.getDateOfBirth()));
             personStmt.setString(3, student.getGender());
@@ -44,7 +44,7 @@ public class StudentDAO {
             try (ResultSet generatedKeys = personStmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int personID = generatedKeys.getInt(1);
-                    // Insert into students table
+                    // Them vao bang sinh vien
                     studentStmt.setInt(1, student.getStudentID());
                     studentStmt.setInt(2, personID);
                     studentStmt.executeUpdate();

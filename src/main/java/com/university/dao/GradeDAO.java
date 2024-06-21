@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GradeDAO {
-    public List<Grade> getGradesByStudentID(int studentID) {
+    public List<Grade> getGradesByStudentID(int studentID) { //
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT student_id, custom_subject_id, score FROM grades WHERE student_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();

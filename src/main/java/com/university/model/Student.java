@@ -13,4 +13,9 @@ public class Student extends Person {
     public int getStudentID() {
         return studentID;
     }
+
+    @Override
+    public String toString() {
+        return studentID + " - " + getName();
+    }
 }
