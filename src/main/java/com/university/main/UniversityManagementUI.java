@@ -242,10 +242,14 @@ public class UniversityManagementUI extends JFrame {
             if (result == JOptionPane.OK_OPTION) {
                 Subject selectedSubject = (Subject) subjectComboBox.getSelectedItem();
                 if (selectedSubject != null) {
-                    // Đăng ký môn học cho sinh viên
-                    new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getCustomSubjectID());
-                    JOptionPane.showMessageDialog(this, "Subject enrolled successfully!");
-                    updateStudentInfoPanel(studentID); // Cập nhật thông tin sinh viên
+                    // Kiểm tra xem sinh viên đã đăng ký môn học chưa
+                    boolean success = new StudentDAO().assignCourseToStudent(studentID, selectedSubject.getCustomSubjectID());
+                    if (success) {
+                        JOptionPane.showMessageDialog(this, "Subject enrolled successfully!");
+                        updateStudentInfoPanel(studentID); // Cập nhật thông tin sinh viên
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Student is already enrolled in this subject.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(this, "No subject selected.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
