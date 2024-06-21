@@ -30,7 +30,11 @@ public class StudentDAO {
         return students;
     }
 
-    public void saveStudent(Student student) {
+    public boolean saveStudent(Student student) {
+        if (isStudentIDExists(student.getStudentID())) {
+            return false; // ID đã tồn tại, không thêm sinh viên mới
+        }
+
         String personSql = "INSERT INTO persons (name, date_of_birth, gender) VALUES (?, ?, ?)";
         String studentSql = "INSERT INTO students (student_id, person_id) VALUES (?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -48,11 +52,13 @@ public class StudentDAO {
                     studentStmt.setInt(1, student.getStudentID());
                     studentStmt.setInt(2, personID);
                     studentStmt.executeUpdate();
+                    return true; // Thêm sinh viên thành công
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false; // Thêm sinh viên không thành công do lỗi
     }
 
     public void updateStudent(Student student) {
@@ -123,6 +129,21 @@ public class StudentDAO {
             e.printStackTrace();
         }
         return student;
+    }
+    public boolean isStudentIDExists(int studentID) {
+        String sql = "SELECT COUNT(*) FROM students WHERE student_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, studentID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public List<Student> getStudentsBySubjectID(int subjectID) {
